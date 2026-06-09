@@ -1,9 +1,3 @@
-# Dataset
-data/
-*.xlsx
-*.xls
-*.csv
-
 # Config
 config.yaml
 
