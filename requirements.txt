@@ -1,8 +1,10 @@
+streamlit
 pandas
 numpy
 plotly
-streamlit
 pyarrow
 python-docx
 openpyxl
 sastrawi
+scikit-learn
+scipy
