@@ -78,7 +78,8 @@ def calculate_coverage(df):
 def save_output(output_folder, topic_df, summary_df):
     output_folder.mkdir(parents=True, exist_ok=True)
 
-    topic_df.to_parquet(output_folder / "topic_dataset.parquet",  index=False)
+    public_df = topic_df.drop(columns=["subject", "pesan"], errors="ignore")
+    public_df.to_parquet(output_folder / "topic_dataset.parquet", index=False)
     summary_df.to_csv(  output_folder / "topic_summary.csv",      index=False, encoding="utf-8-sig")
 
 
