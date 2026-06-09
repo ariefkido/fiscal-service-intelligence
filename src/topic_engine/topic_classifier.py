@@ -9,9 +9,8 @@ import re
 
 from topic_engine.topic_taxonomy import TOPIC_TAXONOMY, TOPIC_PRIORITY
 
-# =====================================================
-# CLEAN TEXT
-# =====================================================
+
+# --- normalize text ----------------------------------------------------------
 
 def normalize_text(text):
     if pd.isna(text):
@@ -23,9 +22,8 @@ def normalize_text(text):
 
     return text
 
-# =====================================================
-# CLASSIFY TOPIC
-# =====================================================
+
+# --- classify topic ----------------------------------------------------------
 
 def classify_topic(subject, message):
     combined = f"{normalize_text(subject)} {normalize_text(message)}"
@@ -37,26 +35,31 @@ def classify_topic(subject, message):
 
     return "LAINNYA"
 
-# =====================================================
-# LOAD DATA
-# =====================================================
+
+# --- load data ---------------------------------------------------------------
 
 def load_ticket_dataset(file_path):
     print("\nLoading ticket dataset...")
     return pd.read_parquet(file_path)
 
-# =====================================================
-# APPLY CLASSIFICATION
-# =====================================================
+
+# --- apply classification ----------------------------------------------------
 
 def apply_classification(df):
     print("\nClassifying topics...")
-    df["topic"] = df.apply(lambda row: classify_topic(row["subject"], row["pesan"]), axis=1)
+
+    df["topic"] = df.apply(
+        lambda row: classify_topic(
+            row.get("subject_clean", ""),
+            row.get("pesan_clean", "")
+        ),
+        axis=1
+    )
+
     return df
 
-# =====================================================
-# COVERAGE ANALYSIS
-# =====================================================
+
+# --- summary & coverage ------------------------------------------------------
 
 def build_summary(df):
     summary         = df["topic"].value_counts().reset_index()
@@ -64,28 +67,22 @@ def build_summary(df):
     summary["persentase"] = (summary["jumlah_tiket"] / len(df) * 100).round(2)
     return summary
 
-# =====================================================
-# COVERAGE METRIC
-# =====================================================
-
 def calculate_coverage(df):
     total         = len(df)
     uncategorized = (df["topic"] == "LAINNYA").sum()
     return round((total - uncategorized) / total * 100, 2)
 
-# =====================================================
-# SAVE OUTPUT
-# =====================================================
+
+# --- save output -------------------------------------------------------------
 
 def save_output(output_folder, topic_df, summary_df):
     output_folder.mkdir(parents=True, exist_ok=True)
 
-    topic_df.to_parquet(output_folder / "topic_dataset.parquet", index=False)
-    summary_df.to_csv(output_folder / "topic_summary.csv", index=False, encoding="utf-8-sig")
+    topic_df.to_parquet(output_folder / "topic_dataset.parquet",  index=False)
+    summary_df.to_csv(  output_folder / "topic_summary.csv",      index=False, encoding="utf-8-sig")
 
-# =====================================================
-# MAIN
-# =====================================================
+
+# --- main --------------------------------------------------------------------
 
 def main():
     root          = Path(__file__).resolve().parents[2]
@@ -93,7 +90,7 @@ def main():
     output_folder = root / "data" / "processed"
 
     df = load_ticket_dataset(input_file)
-    print(f"Total tiket : {len(df):,}")
+    print(f"Total tiket  : {len(df):,}")
 
     topic_df   = apply_classification(df)
     summary_df = build_summary(topic_df)
@@ -101,15 +98,12 @@ def main():
 
     save_output(output_folder, topic_df, summary_df)
 
-    print("\n==================================")
-    print(f"Coverage     : {coverage}%")
+    print(f"\nCoverage     : {coverage}%")
     print(f"Classified   : {coverage}%")
     print(f"Unclassified : {100 - coverage}%")
     print("\nTop Topics")
     print(summary_df.head(20))
-    print("\nOutput:")
-    print(output_folder)
-    print("\n==================================")
+    print(f"\nOutput:\n{output_folder}")
 
 
 if __name__ == "__main__":
