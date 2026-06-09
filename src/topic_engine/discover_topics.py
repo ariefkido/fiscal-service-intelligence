@@ -1,13 +1,17 @@
 from pathlib import Path
+import sys
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
 from collections import Counter
 import pandas as pd
 import re
 
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+from topic_engine.pii_anonymizer import anonymize_text
 
-# =====================================================
-# STOPWORDS
-# =====================================================
+
+# --- stopwords ---------------------------------------------------------------
 
 def build_stopwords():
     factory    = StopWordRemoverFactory()
@@ -40,9 +44,8 @@ def build_stopwords():
     stop_words.update(custom_stopwords)
     return stop_words
 
-# =====================================================
-# REMOVE EMAIL FOOTER
-# =====================================================
+
+# --- email footer ------------------------------------------------------------
 
 def remove_email_footer(text):
     if pd.isna(text):
@@ -74,9 +77,8 @@ def remove_email_footer(text):
 
     return text
 
-# =====================================================
-# SUBJECT CLEANER
-# =====================================================
+
+# --- subject cleaner ---------------------------------------------------------
 
 def clean_subject(text):
     if pd.isna(text):
@@ -89,9 +91,8 @@ def clean_subject(text):
 
     return text.strip()
 
-# =====================================================
-# TEXT CLEANER
-# =====================================================
+
+# --- text cleaner ------------------------------------------------------------
 
 def clean_text(text, stop_words):
     if pd.isna(text):
@@ -104,25 +105,20 @@ def clean_text(text, stop_words):
 
     return " ".join(words)
 
-# =====================================================
-# BIGRAM
-# =====================================================
+
+# --- bigram ------------------------------------------------------------------
 
 def generate_bigrams(text):
     words = text.split()
-
     if len(words) < 2:
         return []
-
     return [f"{words[i]} {words[i+1]}" for i in range(len(words) - 1)]
 
-# =====================================================
-# LOAD FILES
-# =====================================================
+
+# --- load files --------------------------------------------------------------
 
 def load_hai_files(raw_folder):
     files = sorted(Path(raw_folder).glob("sintetik_data_hai_*.xlsx"))
-
     if not files:
         raise FileNotFoundError(f"Tidak ditemukan file HAI:\n{raw_folder}")
 
@@ -137,16 +133,14 @@ def load_hai_files(raw_folder):
 
     return pd.concat(dfs, ignore_index=True)
 
-# =====================================================
-# BUILD TICKET DATASET
-# =====================================================
+
+# --- build ticket dataset ----------------------------------------------------
 
 def build_ticket_dataset(df):
     print("\nMembentuk dataset tiket...")
 
     required_cols = ["ref_tiket", "tgl_tiket", "subject", "bidang", "pesan"]
-    missing = [col for col in required_cols if col not in df.columns]
-
+    missing       = [col for col in required_cols if col not in df.columns]
     if missing:
         raise ValueError(f"Kolom tidak ditemukan: {missing}")
 
@@ -167,11 +161,13 @@ def build_ticket_dataset(df):
     tickets["bulan"]   = tickets["tgl_tiket"].dt.month
     tickets["periode"] = tickets["tgl_tiket"].dt.strftime("%Y-%m")
 
+    for col in ("subject", "pesan"):
+        tickets[col] = tickets[col].fillna("").apply(anonymize_text)
+
     return tickets
 
-# =====================================================
-# DISCOVERY
-# =====================================================
+
+# --- discovery ---------------------------------------------------------------
 
 def discover_topics(tickets, stop_words):
     print("\nCleaning subject...")
@@ -180,10 +176,12 @@ def discover_topics(tickets, stop_words):
     print("Cleaning message...")
     tickets["pesan_clean"] = tickets["pesan"].apply(lambda x: clean_text(x, stop_words))
 
+    tickets = tickets.drop(columns=["subject", "pesan"], errors="ignore")
+
     top_subjects         = tickets["subject_clean"].value_counts().reset_index()
     top_subjects.columns = ["subject", "jumlah_tiket"]
 
-    all_words   = [w for text in tickets["pesan_clean"] for w in text.split()]
+    all_words    = [w for text in tickets["pesan_clean"] for w in text.split()]
     top_keywords = pd.DataFrame(Counter(all_words).most_common(1000), columns=["keyword", "frequency"])
     top_keywords = top_keywords[top_keywords["frequency"] >= 20]
 
@@ -196,22 +194,20 @@ def discover_topics(tickets, stop_words):
 
     return tickets, top_subjects, top_keywords, top_bigrams, top_bidang
 
-# =====================================================
-# SAVE OUTPUT
-# =====================================================
+
+# --- save output -------------------------------------------------------------
 
 def save_outputs(output_folder, tickets, top_subjects, top_keywords, top_bigrams, top_bidang):
     output_folder.mkdir(parents=True, exist_ok=True)
 
     top_subjects.to_csv(output_folder / "top_subjects.csv", index=False, encoding="utf-8-sig")
     top_keywords.to_csv(output_folder / "top_keywords.csv", index=False, encoding="utf-8-sig")
-    top_bigrams.to_csv(output_folder / "top_bigrams.csv",   index=False, encoding="utf-8-sig")
-    top_bidang.to_csv(output_folder / "top_bidang.csv",     index=False, encoding="utf-8-sig")
+    top_bigrams.to_csv( output_folder / "top_bigrams.csv",  index=False, encoding="utf-8-sig")
+    top_bidang.to_csv(  output_folder / "top_bidang.csv",   index=False, encoding="utf-8-sig")
     tickets.to_parquet(output_folder / "ticket_dataset.parquet", index=False)
 
-# =====================================================
-# MAIN
-# =====================================================
+
+# --- main --------------------------------------------------------------------
 
 def main():
     root          = Path(__file__).resolve().parents[2]
@@ -222,7 +218,7 @@ def main():
     print(f"\nTotal record : {len(df):,}")
 
     tickets = build_ticket_dataset(df)
-    print(f"Total tiket : {len(tickets):,}")
+    print(f"Total tiket  : {len(tickets):,}")
 
     stop_words = build_stopwords()
     tickets, top_subjects, top_keywords, top_bigrams, top_bidang = discover_topics(tickets, stop_words)
