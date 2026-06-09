@@ -19,8 +19,8 @@ yang dapat mempengaruhi kualitas pelaksanaan anggaran.
 Berdasarkan hasil analisis, topik dengan prioritas
 tertinggi saat ini adalah:
 
-TOPIC           : UP_TUP_GUP
-WATCHLIST SCORE : 93.11
+TOPIC           : MPN_G3
+WATCHLIST SCORE : 83.84
 PRIORITY        : CRITICAL
 
 ------------------------------------------------------------
@@ -30,11 +30,11 @@ PRIORITY        : CRITICAL
 Lima topik yang memerlukan perhatian dan pembinaan
 lebih lanjut adalah:
 
-1. UP_TUP_GUP
-2. MPN_G3
-3. LPJ_BENDAHARA
-4. SAKTI
-5. SIMASPATEN
+1. MPN_G3
+2. CAPAIAN_OUTPUT
+3. SAKTI
+4. SIMASPATEN
+5. LPJ_BENDAHARA
 
 ------------------------------------------------------------
 3. LEADING INDICATOR ANALYSIS
@@ -42,8 +42,8 @@ lebih lanjut adalah:
 
 TOPIK TERKUAT TERHADAP IKPA
 
-Topic       : UP_TUP_GUP
-Correlation : -0.830
+Topic       : MPN_G3
+Correlation : -0.702
 Lag         : 0 bulan
 Direction   : NEGATIVE
 
@@ -55,16 +55,16 @@ anggaran yang tercermin dalam nilai IKPA.
 
 TOPIK TERKUAT TERHADAP REALISASI
 
-Topic       : SAS
-Correlation : -0.570
-Lag         : 0 bulan
+Topic       : PMRT
+Correlation : -0.534
+Lag         : 1 bulan
 Direction   : NEGATIVE
 
 Interpretasi:
 
 Peningkatan permasalahan pada topik tersebut
 berpotensi mempengaruhi realisasi anggaran
-dalam kurun waktu 0 bulan
+dalam kurun waktu 1 bulan
 setelah permasalahan muncul.
 
 ------------------------------------------------------------
@@ -90,7 +90,7 @@ dan perlambatan realisasi anggaran.
 ------------------------------------------------------------
 
 1. Prioritaskan pembinaan pada topik
-   UP_TUP_GUP.
+   MPN_G3.
 
 2. Tingkatkan monitoring terhadap topik
    yang memiliki hubungan kuat dengan IKPA
