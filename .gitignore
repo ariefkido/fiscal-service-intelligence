@@ -1,17 +1,49 @@
-# Config
-config.yaml
-
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# Streamlit
-.streamlit/
-
-# Virtual Env
+# Virtual Environment
 .venv/
+venv/
 env/
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+
+# Raw Data (JANGAN UPLOAD)
+data/raw/
+
+# Temporary Files
+tmp/
+temp/
+
+# Generated Outputs
+outputs/
+reports/
+executive_brief.docx
+
+# Streamlit Cache
+.streamlit/cache/
+
+# Build
+build/
+dist/
+
+# Testing
+.pytest_cache/
+.coverage
