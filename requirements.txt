@@ -1,0 +1,8 @@
+pandas
+numpy
+plotly
+streamlit
+pyarrow
+python-docx
+openpyxl
+sastrawi

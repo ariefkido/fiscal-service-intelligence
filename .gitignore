@@ -1,0 +1,23 @@
+# Dataset
+data/
+*.xlsx
+*.xls
+*.csv
+
+# Config
+config.yaml
+
+# Python
+__pycache__/
+*.pyc
+
+# Streamlit
+.streamlit/
+
+# Virtual Env
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
