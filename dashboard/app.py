@@ -173,6 +173,10 @@ watchlist_filtered = build_watchlist(
     ikpa_leading_df,
     realisasi_leading_df,
 )
+st.write("type:", type(watchlist_filtered))
+st.write("columns:", watchlist_filtered.columns.tolist() if hasattr(watchlist_filtered, "columns") else "N/A")
+st.write("shape:", watchlist_filtered.shape if hasattr(watchlist_filtered, "shape") else "N/A")
+st.stop()
 
 # =====================================================
 # KPI
