@@ -1,5 +1,12 @@
 import streamlit as st
 import pandas as pd
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from analytics.watchlist_analysis import build_watchlist
 
 DISPLAY_COLUMNS = {
     "topic": "Topic",
@@ -12,7 +19,8 @@ DISPLAY_COLUMNS = {
     "diversity_score": "Diversity",
     "length_score": "Length",
     "watchlist_score": "Watchlist Score",
-    "priority": "Rank",
+    "priority": "Priority",
+    "rank": "Rank",
 }
 
 from data_loader import (
@@ -68,7 +76,6 @@ def load_all():
     realisasi_df         = load_realisasi()
     ikpa_leading_df      = load_ikpa_leading()
     realisasi_leading_df = load_realisasi_leading()
-    watchlist_df         = load_watchlist()
 
     return (
         heatmap_df,
@@ -79,7 +86,6 @@ def load_all():
         realisasi_df,
         ikpa_leading_df,
         realisasi_leading_df,
-        watchlist_df,
     )
 
 
@@ -92,7 +98,6 @@ def load_all():
     realisasi_df,
     ikpa_leading_df,
     realisasi_leading_df,
-    watchlist_df,
 ) = load_all()
 
 # =====================================================
@@ -118,15 +123,56 @@ st.sidebar.header("Filter")
 available_years = sorted(heatmap_df["tahun"].unique())
 selected_year   = st.sidebar.selectbox("Tahun", available_years, index=len(available_years) - 1)
 
+MONTH_NAMES = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "Mei",
+    6: "Jun",
+    7: "Jul",
+    8: "Agu",
+    9: "Sep",
+    10: "Okt",
+    11: "Nov",
+    12: "Des",
+}
+
+available_months = sorted(
+    heatmap_df[heatmap_df["tahun"] == selected_year]["bulan"].unique()
+)
+selected_month = st.sidebar.selectbox(
+    "Sampai Bulan",
+    available_months,
+    index=len(available_months) - 1,
+    format_func=lambda x: MONTH_NAMES[x],
+)
+
+st.caption(
+    f"Periode Analisis: Jan {selected_year} - "
+    f"{MONTH_NAMES[selected_month]} {selected_year}"
+)
+
 # =====================================================
 # FILTER DATA
 # =====================================================
 
-heatmap_filtered   = heatmap_df[heatmap_df["tahun"]       == selected_year]
-emerging_filtered  = emerging_df[emerging_df["tahun"]     == selected_year]
-risk_filtered      = risk_df[risk_df["tahun"]             == selected_year]
-ikpa_filtered      = ikpa_df[ikpa_df["tahun"]             == selected_year]
-realisasi_filtered = realisasi_df[realisasi_df["tahun"]   == selected_year]
+heatmap_filtered   = heatmap_df[  (heatmap_df["tahun"]   == selected_year) & (heatmap_df["bulan"]   <= selected_month)]
+emerging_filtered  = emerging_df[ (emerging_df["tahun"]  == selected_year) & (emerging_df["bulan"]  <= selected_month)]
+risk_filtered      = risk_df[     (risk_df["tahun"]      == selected_year) & (risk_df["bulan"]      <= selected_month)]
+ikpa_filtered      = ikpa_df[     (ikpa_df["tahun"]      == selected_year) & (ikpa_df["bulan"]      <= selected_month)]
+realisasi_filtered = realisasi_df[(realisasi_df["tahun"] == selected_year) & (realisasi_df["bulan"] <= selected_month)]
+
+# =====================================================
+# DYNAMIC WATCHLIST
+# =====================================================
+
+watchlist_filtered = build_watchlist(
+    emerging_filtered,
+    complexity_df,
+    ikpa_leading_df,
+    realisasi_leading_df,
+)
 
 # =====================================================
 # KPI
@@ -202,10 +248,10 @@ st.subheader("🛎 Early Warning Watchlist")
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.plotly_chart(plot_watchlist(watchlist_df), use_container_width=True)
+    st.plotly_chart(plot_watchlist(watchlist_filtered), use_container_width=True)
 with col2:
     display_df = (
-        watchlist_df[["priority", "topic", "watchlist_score"]]
+        watchlist_filtered[["rank", "topic", "priority", "watchlist_score"]]
         .head(10)
         .rename(columns=DISPLAY_COLUMNS)
     )
@@ -215,7 +261,7 @@ with col2:
         use_container_width=True,
     )
 
-st.warning(build_watchlist_summary(watchlist_df))
+st.warning(build_watchlist_summary(watchlist_filtered))
 st.divider()
 
 # =====================================================
@@ -223,7 +269,7 @@ st.divider()
 # =====================================================
 
 st.subheader("📖 Key Findings & Recommendations")
-for finding in build_key_findings(watchlist_df, ikpa_leading_df, realisasi_leading_df, risk_df):
+for finding in build_key_findings(watchlist_filtered, ikpa_leading_df, realisasi_leading_df, risk_df):
     st.info(finding)
 st.divider()
 
@@ -266,14 +312,21 @@ st.subheader("Top Emerging Issues")
 
 latest_period = emerging_filtered["periode"].max()
 
-top_emerging_df = (
-    emerging_filtered[
-        emerging_filtered["periode"] == latest_period
-    ]
-    .sort_values("emerging_index", ascending=False)
-    .head(10)
-)
-emerging_cols   = ["topic", "jumlah_tiket", "growth_rate", "emerging_index"]
+if len(emerging_filtered) > 0:
+    latest_period = emerging_filtered["periode"].max()
+
+    top_emerging_df = (
+        emerging_filtered[
+            emerging_filtered["periode"] == latest_period
+        ]
+        .sort_values("emerging_index", ascending=False)
+        .head(10)
+    )
+else:
+    top_emerging_df = pd.DataFrame(
+        columns=["topic", "emerging_index", "jumlah_tiket", "growth_rate"]
+    )
+emerging_cols   = ["topic", "emerging_index", "jumlah_tiket", "growth_rate"]
 
 col1, col2 = st.columns([2, 1])
 with col1:

@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 PROJECT_ROOT  = Path(__file__).resolve().parents[2]
-INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset Realisasi Anggaran 2020-2022"
+INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset Realisasi Anggaran"
 OUTPUT_FOLDER = PROJECT_ROOT / "data" / "processed"
 
 # =====================================================
@@ -48,8 +48,12 @@ def process_single_file(file_path):
     records    = []
 
     for month_name, month_num in MONTH_MAP.items():
-        value = pd.to_numeric(row[month_name], errors="coerce")
-        value = float(value) if not pd.isna(value) else 0.0
+        value = pd.to_numeric(row.get(month_name), errors="coerce")
+
+        if pd.isna(value):
+            continue
+
+        value = float(value)
 
         cumulative += value
         pct         = cumulative / pagu * 100

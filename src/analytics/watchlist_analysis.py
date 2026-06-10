@@ -74,7 +74,14 @@ def build_watchlist(emerging, complexity, ikpa, realisasi):
         labels=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
     )
 
-    return df.sort_values("watchlist_score", ascending=False).reset_index(drop=True)
+    df = df.sort_values(
+        "watchlist_score",
+        ascending=False
+    ).reset_index(drop=True)
+
+    df["rank"] = range(1, len(df) + 1)
+
+    return df
 
 # =====================================================
 # SAVE OUTPUT

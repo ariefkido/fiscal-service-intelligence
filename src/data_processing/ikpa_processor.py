@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 PROJECT_ROOT  = Path(__file__).resolve().parents[2]
-INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset IKPA 2020-2022"
+INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset IKPA"
 OUTPUT_FOLDER = PROJECT_ROOT / "data" / "processed"
 
 # =====================================================

@@ -221,7 +221,7 @@ def save_outputs(output_folder, tickets, top_subjects, top_keywords, top_bigrams
 # =====================================================
 
 def main():
-    raw_folder    = PROJECT_ROOT / "data" / "raw" / "Dataset HAI DJPb 2020-2022"
+    raw_folder    = PROJECT_ROOT / "data" / "raw" / "Dataset HAI DJPb"
     output_folder = PROJECT_ROOT / "outputs" / "topic_discovery"
 
     df = load_hai_files(raw_folder)

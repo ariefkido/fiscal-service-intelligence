@@ -1,82 +1,94 @@
 ﻿bidang,jumlah_tiket
-L1 - HAI DJPb,2707
-L2 - SAKTI Laksana,794
-L2 - SAKTI Laporan,741
-L2 - SAKTI ADMIN,615
-L2 - BC PM,346
-L3 - Dit SP - SPKPP,312
-L2 - APLIKASI GAJI,298
-L2 - SPRINT,223
-L2 - SAS,204
-L3 - Subdit KKPA,160
+L1 - HAI DJPb,3522
+L2 - SAKTI Laporan,963
+L2 - SAKTI Laksana,838
+L2 - SAKTI ADMIN,700
+L2 - APLIKASI GAJI,420
+L3 - Dit SP - SPKPP,405
+L2 - BC PM,371
+L2 - SPRINT,243
+L2 - SAS,215
+L2 - SAKTI BENDAHARA,188
+L3 - Subdit KKPA,185
+L2 - SAKTI KOMITMEN,173
+L3 - Subdit PA 1,158
 L2 - SMI PDR SIKP,156
-L3 - Subdit PA 2,136
-L3 - Subdit PA 1,132
-L2 - OM SPAN,126
-L2 - Infra - Perangkat Lunak,124
-L2 - SAKTI BENDAHARA,109
-L3 - Subdit PA 4,106
-L2 - SAKTI KOMITMEN,103
-L3 - SMI - KPIL,96
-L3 - Subdit PA 3,94
-L2 - SA GL,89
-L3 - PKN - MPPK,84
-L2 - CM GR,83
-L2 - SAKTI PEMBAYARAN,64
-L2 - Dit SP (Moderator),55
+L3 - Subdit PA 2,153
+L2 - OM SPAN,136
+L2 - Infra - Perangkat Lunak,132
+L3 - Subdit PA 4,123
+L3 - Subdit PA 3,117
+L2 - SA GL,108
+L3 - SMI - KPIL,103
+L3 - PKN - MPPK,96
+L2 - CM GR,92
+L2 - SAKTI PEMBAYARAN,84
+L2 -  MPN,60
+L2 - PDR User SPAN,57
+L2 - Dit SP (Moderator),57
+L2 - SIMSERBA/EJAFUNG/SIMASPATEN,57
+L3 - PKN - MRLPPB,54
+L3 - APK - BAIBUN,53
 L2 - Erekon,50
-L3 - PKN - MRLPPB,48
-L2 -  MPN,48
-L2 - PDR User SPAN,47
-L2 - PDR CoA,46
-L2 - SIMSERBA/EJAFUNG/SIMASPATEN,46
-L3 - APK - BAIBUN,44
+L2 - PDR CoA,49
+L3 - Dit SP - HPP,39
+L3 - APK - SA BAS,35
 L2 - SAIBA/SIMAK/PERSEDIAAN,35
-L3 - APK - SA BAS,32
-L3 - Dit SP - HPP,31
-L2 - OM SPAN DANA DESA & MONSAKTI,23
-L2 - Infra - Basis Data,21
+L2 - OM SPAN DANA DESA & MONSAKTI,28
+L2 - Infra - Basis Data,22
+L3 - APK - APPRABUN,19
 L3 - SAKTI Anggaran,19
 L2 - SAKTI Anggaran,19
-L3 - APK - APPRABUN,18
 L3 - PKN - MKPH,18
 L2 - Infra - Jaringan,17
-L2 - KPPN KP,15
-"L3 - Dit SP - PPJS,PFK,KTGR",15
-L2 - Dit PPK BLU,13
-L2 - PDR Supplier,11
+L2 - KPPN KP,16
+"L3 - Dit SP - PPJS,PFK,KTGR",16
+L2 - Dit PPK BLU,15
+L2 - PDR Supplier,12
+L3 - APK - SA PUSAT,12
+L2 - SILDSM Bagian SDM,11
 L1 - SAPA ANGGARAN,10
-L3 - APK - SA PUSAT,10
+L3 - PKN - OPKAS,10
+L3 - APK - SA BUNUK,10
 L2 - Infra - Perangkat Keras,9
 L2 - SIKP PEN,9
-L3 - PKN - OPKAS,8
-L2 - SILDSM Bagian SDM,8
 L2 - Dit SMI (Moderator),7
 L2 - SMI Proses Bisnis PEN & SIKP,7
-L3 - APK - SA BUNUK,7
-L2 - Dit APK (Spv),5
+L2 - Dit APK (Spv),6
 L3 - APK - SA INSTANSI,5
 L3 - OPSU SAKTI,5
 L3 - PKN - SAPPK,5
+L3 - Dit SP - PPBH,4
+L2 - Subbagian Perencanaan Strategis Organisasi Bagian OTL DJPb,4
+L2 - Subbagian Pengelolaan Kinerja Organisasi Bagian OTL DJPb,4
 L2 - SITP PKSI,4
+L2 - Subbagian Tata Laksana Bagian OTL DJPb,4
+L2 - PIP Penyaluran Pembiayaan,4
 L2 - eDJPb,3
 L2 - E SPM,3
-L3 - Dit SP - PPBH,3
-L2 - Subbagian Perencanaan Strategis Organisasi Bagian OTL DJPb,3
 L2 - Subbagian Manajemen Risiko DJPb,3
-L2 - Subbagian Pengelolaan Kinerja Organisasi Bagian OTL DJPb,2
+L2 - Subbagian Kehumasan Layanan Informasi dan Protokoler DJPb,3
+L2 - Sub Bagian Rumah Tangga DJPb,2
 L2 - SITP PKTTI,2
 L3 - Dit SP - LKK,2
-L2 - Subbagian Kehumasan Layanan Informasi dan Protokoler DJPb,2
+L3 - SAKTI KOMINFO,2
+L2 -  Sains Data,2
+L2 - BPDLH Penyaluran Dana Program,2
 L3 - PKN - KTDRMR,1
 L2 - Subbagian Pengembangan Organisasi Bagian OTL DJPb,1
-L2 - Sub Bagian Rumah Tangga DJPb,1
 L2 - Subbagian  Perbendaharaan Bagian Keuangan DJPb,1
 L3 - SMI - Inv Pemda/BUMD,1
 L2 - Subbagian Pengelolaan Belanja Pegawai dan Kesejahteraan Bagian Keuangan DJPb,1
 L2 - PKBO Bagian SDM,1
 L2 - BIOS,1
-L3 - SAKTI KOMINFO,1
 L2 - Subbagian Pemantauan Pengendalian Internal DJPb,1
 L2 - Mutasi & Penilaian Kinerja Bagian SDM,1
-L2 - Subbagian Tata Laksana Bagian OTL DJPb,1
+L2 - Subbagian Evaluasi dan Tindak Lanjut Hasil Audit DJPb,1
+L1 - DJPK,1
+L2 -  BPDLH Mod/Redaktur,1
+L3 - SMI - Inv BUMN,1
+L2 - PIP Sistem Informasi dan Teknologi,1
+L2 - PIP Umum,1
+L3 - APK - PBLTKNBUN,1
+L2 - PIP Kerjasama Pendanaan,1
+,1
