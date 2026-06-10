@@ -32,13 +32,15 @@ def normalize(series):
 # =====================================================
 
 def build_watchlist(emerging, complexity, ikpa, realisasi):
-    emerging_latest = (
-        emerging
-        .sort_values("periode")
-        .groupby("topic")
-        .tail(1)
-        [["topic", "emerging_index"]]
-    )
+    if len(emerging) == 0 or "emerging_index" not in emerging.columns:
+        emerging_latest = pd.DataFrame(columns=["topic", "emerging_index"])
+    else:
+        emerging_latest = (
+            emerging
+            .sort_values("periode")
+            .groupby("topic", as_index=False)
+            .last()[["topic", "emerging_index"]]
+        )
 
     impact = (
         ikpa[["topic", "abs_correlation"]]
