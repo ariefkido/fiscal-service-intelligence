@@ -123,16 +123,78 @@ def plot_complexity_radar(complexity_df, selected_topics):
 # =====================================================
 
 def plot_risk_monitor(df):
-    fig = px.line(df, x="periode", y="risk_score", markers=True, title="Risk Monitoring Timeline")
 
+    color_map = {
+        "GREEN": "#00B050",
+        "YELLOW": "#FFD966",
+        "RED": "#C00000",
+    }
+
+    fig = go.Figure()
+
+    # garis per segmen mengikuti level risiko
+    for i in range(len(df) - 1):
+
+        level = df.iloc[i + 1]["risk_level"]
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["periode"].iloc[i:i+2],
+                y=df["risk_score"].iloc[i:i+2],
+                mode="lines",
+                line=dict(
+                    color=color_map.get(level, "#6FA8DC"),
+                    width=4,
+                ),
+                showlegend=False,
+                hoverinfo="skip",
+            )
+        )
+
+    # marker titik
+    fig.add_trace(
+        go.Scatter(
+            x=df["periode"],
+            y=df["risk_score"],
+            mode="markers",
+            marker=dict(
+                size=10,
+                color=[color_map.get(x, "#6FA8DC") for x in df["risk_level"]],
+                line=dict(width=1, color="white"),
+            ),
+            text=df["risk_level"],
+            hovertemplate=(
+                "<b>%{x}</b><br>"
+                "Risk Score: %{y:.1f}<br>"
+                "Level: %{text}<extra></extra>"
+            ),
+            showlegend=False,
+        )
+    )
+
+    # threshold lines
     if "threshold_yellow" in df.columns and "threshold_red" in df.columns:
-        fig.add_hline(y=df["threshold_yellow"].iloc[0], line_dash="dash", annotation_text="Yellow")
-        fig.add_hline(y=df["threshold_red"].iloc[0],    line_dash="dash", annotation_text="Red")
+
+        fig.add_hline(
+            y=df["threshold_yellow"].iloc[0],
+            line_dash="dash",
+            line_color="#FFD966",
+            annotation_text="Yellow",
+        )
+
+        fig.add_hline(
+            y=df["threshold_red"].iloc[0],
+            line_dash="dash",
+            line_color="#C00000",
+            annotation_text="Red",
+        )
 
     fig.update_layout(
+        title="Risk Monitoring Timeline",
         height=500,
         xaxis_title="Period",
-        yaxis_title="Risk Score"
+        yaxis_title="Risk Score",
+        hovermode="x unified",
     )
 
     return fig
