@@ -2,13 +2,9 @@ from pathlib import Path
 import pandas as pd
 import re
 
-# =====================================================
-# CONFIG
-# =====================================================
-
-ROOT          = Path(__file__).resolve().parents[2]
-INPUT_FOLDER  = ROOT / "data" / "raw" / "Dataset IKPA 2020-2022"
-OUTPUT_FOLDER = ROOT / "data" / "processed"
+PROJECT_ROOT  = Path(__file__).resolve().parents[2]
+INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset IKPA 2020-2022"
+OUTPUT_FOLDER = PROJECT_ROOT / "data" / "processed"
 
 # =====================================================
 # EXTRACT PERIODE
@@ -35,11 +31,10 @@ def process_file(file_path):
 
     df = pd.read_excel(file_path, header=None)
 
-    # Header berada di row 2
-    headers    = df.iloc[2].fillna("").astype(str).tolist()
-    data       = df.iloc[4:].copy()
-    data.columns = headers
-    data       = data.dropna(how="all")
+    headers       = df.iloc[2].fillna("").astype(str).tolist()
+    data          = df.iloc[4:].copy()
+    data.columns  = headers
+    data          = data.dropna(how="all")
 
     nilai_col = None
     for col in data.columns:
@@ -65,7 +60,7 @@ def process_file(file_path):
     }
 
 # =====================================================
-# PROCESS ALL
+# PROCESS ALL FILES
 # =====================================================
 
 def process_all_files():
@@ -83,16 +78,14 @@ def process_all_files():
     return pd.DataFrame(rows)
 
 # =====================================================
-# SAVE
+# SAVE OUTPUT
 # =====================================================
 
 def save_output(df):
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    output_file = OUTPUT_FOLDER / "ikpa_monthly.parquet"
-    df.to_parquet(output_file, index=False)
-
-    print(f"\nSaved: {output_file}")
+    df.to_parquet(OUTPUT_FOLDER / "ikpa_monthly.parquet", index=False)
+    df.to_csv(    OUTPUT_FOLDER / "ikpa_monthly.csv",     index=False, encoding="utf-8-sig")
 
 # =====================================================
 # MAIN
@@ -112,6 +105,7 @@ def main():
     print(df.head())
     print(df.tail())
     print(df.describe())
+    print(f"\nOutput:\n{OUTPUT_FOLDER}")
 
 
 if __name__ == "__main__":

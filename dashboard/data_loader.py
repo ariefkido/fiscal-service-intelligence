@@ -20,6 +20,14 @@ def load_parquet(filename):
 
     return pd.read_parquet(file_path)
 
+def load_csv(filename):
+    file_path = DATA_FOLDER / filename
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"File tidak ditemukan:\n{file_path}")
+
+    return pd.read_csv(file_path)
+
 # =====================================================
 # SERVICE HEATMAP
 # =====================================================
@@ -33,7 +41,6 @@ def load_heatmap():
 
 def load_emerging():
     return load_parquet("emerging_issue_dataset.parquet")
-
 
 # =====================================================
 # COMPLEXITY RADAR
@@ -56,6 +63,9 @@ def load_risk_monitor():
 def load_ikpa():
     return load_parquet("ikpa_monthly.parquet")
 
+def load_ikpa_leading():
+    return load_csv("topic_ikpa_best_lag.csv")
+
 # =====================================================
 # REALISASI
 # =====================================================
@@ -63,11 +73,8 @@ def load_ikpa():
 def load_realisasi():
     return load_parquet("realisasi_monthly.parquet")
 
-def load_ikpa_leading():
-    return pd.read_csv(DATA_FOLDER / "topic_ikpa_best_lag.csv")
-
 def load_realisasi_leading():
-    return pd.read_csv(DATA_FOLDER / "topic_realisasi_best_lag.csv")
+    return load_csv("topic_realisasi_best_lag.csv")
 
 # =====================================================
 # WATCHLIST
@@ -82,13 +89,15 @@ def load_watchlist():
 
 def load_all_data():
     return {
-        "heatmap":       load_heatmap(),
-        "emerging":      load_emerging(),
-        "complexity":    load_complexity(),
-        "risk":          load_risk_monitor(),
-        "ikpa":          load_ikpa(),
-        "realisasi":     load_realisasi(),
-        "watchlist":     load_watchlist(),
+        "heatmap":            load_heatmap(),
+        "emerging":           load_emerging(),
+        "complexity":         load_complexity(),
+        "risk":               load_risk_monitor(),
+        "ikpa":               load_ikpa(),
+        "ikpa_leading":       load_ikpa_leading(),
+        "realisasi":          load_realisasi(),
+        "realisasi_leading":  load_realisasi_leading(),
+        "watchlist":          load_watchlist(),
     }
 
 # =====================================================
@@ -102,4 +111,3 @@ if __name__ == "__main__":
 
     for name, df in data.items():
         print(f"{name:<20}{df.shape}")
-

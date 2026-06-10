@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
@@ -10,8 +11,9 @@ import re
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 from topic_engine.pii_anonymizer import anonymize_text
 
-
-# --- stopwords ---------------------------------------------------------------
+# =====================================================
+# STOPWORDS
+# =====================================================
 
 def build_stopwords():
     factory    = StopWordRemoverFactory()
@@ -44,8 +46,9 @@ def build_stopwords():
     stop_words.update(custom_stopwords)
     return stop_words
 
-
-# --- email footer ------------------------------------------------------------
+# =====================================================
+# EMAIL FOOTER REMOVER
+# =====================================================
 
 def remove_email_footer(text):
     if pd.isna(text):
@@ -77,8 +80,9 @@ def remove_email_footer(text):
 
     return text
 
-
-# --- subject cleaner ---------------------------------------------------------
+# =====================================================
+# SUBJECT CLEANER
+# =====================================================
 
 def clean_subject(text):
     if pd.isna(text):
@@ -91,8 +95,9 @@ def clean_subject(text):
 
     return text.strip()
 
-
-# --- text cleaner ------------------------------------------------------------
+# =====================================================
+# TEXT CLEANER
+# =====================================================
 
 def clean_text(text, stop_words):
     if pd.isna(text):
@@ -105,8 +110,9 @@ def clean_text(text, stop_words):
 
     return " ".join(words)
 
-
-# --- bigram ------------------------------------------------------------------
+# =====================================================
+# BIGRAM
+# =====================================================
 
 def generate_bigrams(text):
     words = text.split()
@@ -114,8 +120,9 @@ def generate_bigrams(text):
         return []
     return [f"{words[i]} {words[i+1]}" for i in range(len(words) - 1)]
 
-
-# --- load files --------------------------------------------------------------
+# =====================================================
+# LOAD FILES
+# =====================================================
 
 def load_hai_files(raw_folder):
     files = sorted(Path(raw_folder).glob("sintetik_data_hai_*.xlsx"))
@@ -133,8 +140,9 @@ def load_hai_files(raw_folder):
 
     return pd.concat(dfs, ignore_index=True)
 
-
-# --- build ticket dataset ----------------------------------------------------
+# =====================================================
+# BUILD TICKET DATASET
+# =====================================================
 
 def build_ticket_dataset(df):
     print("\nMembentuk dataset tiket...")
@@ -166,8 +174,9 @@ def build_ticket_dataset(df):
 
     return tickets
 
-
-# --- discovery ---------------------------------------------------------------
+# =====================================================
+# TOPIC DISCOVERY
+# =====================================================
 
 def discover_topics(tickets, stop_words):
     print("\nCleaning subject...")
@@ -194,8 +203,9 @@ def discover_topics(tickets, stop_words):
 
     return tickets, top_subjects, top_keywords, top_bigrams, top_bidang
 
-
-# --- save output -------------------------------------------------------------
+# =====================================================
+# SAVE OUTPUTS
+# =====================================================
 
 def save_outputs(output_folder, tickets, top_subjects, top_keywords, top_bigrams, top_bidang):
     output_folder.mkdir(parents=True, exist_ok=True)
@@ -204,15 +214,15 @@ def save_outputs(output_folder, tickets, top_subjects, top_keywords, top_bigrams
     top_keywords.to_csv(output_folder / "top_keywords.csv", index=False, encoding="utf-8-sig")
     top_bigrams.to_csv( output_folder / "top_bigrams.csv",  index=False, encoding="utf-8-sig")
     top_bidang.to_csv(  output_folder / "top_bidang.csv",   index=False, encoding="utf-8-sig")
-    tickets.to_parquet(output_folder / "ticket_dataset.parquet", index=False)
+    tickets.to_parquet( output_folder / "ticket_dataset.parquet", index=False)
 
-
-# --- main --------------------------------------------------------------------
+# =====================================================
+# MAIN
+# =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    raw_folder    = root / "data" / "raw" / "Dataset HAI DJPb 2020-2022"
-    output_folder = root / "outputs" / "topic_discovery"
+    raw_folder    = PROJECT_ROOT / "data" / "raw" / "Dataset HAI DJPb 2020-2022"
+    output_folder = PROJECT_ROOT / "outputs" / "topic_discovery"
 
     df = load_hai_files(raw_folder)
     print(f"\nTotal record : {len(df):,}")

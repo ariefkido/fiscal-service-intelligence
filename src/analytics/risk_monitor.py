@@ -1,6 +1,8 @@
 from pathlib import Path
 import pandas as pd
-import numpy as np
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROCESSED    = PROJECT_ROOT / "data" / "processed"
 
 # =====================================================
 # CONFIG
@@ -12,13 +14,13 @@ REALISASI_WEIGHT = 0.20
 TOP_N_EMERGING   = 5
 
 # =====================================================
-# LOAD
+# LOAD DATA
 # =====================================================
 
-def load_data(root):
-    emerging  = pd.read_parquet(root / "data" / "processed" / "emerging_issue_dataset.parquet")
-    ikpa      = pd.read_parquet(root / "data" / "processed" / "ikpa_monthly.parquet")
-    realisasi = pd.read_parquet(root / "data" / "processed" / "realisasi_monthly.parquet")
+def load_data():
+    emerging  = pd.read_parquet(PROCESSED / "emerging_issue_dataset.parquet")
+    ikpa      = pd.read_parquet(PROCESSED / "ikpa_monthly.parquet")
+    realisasi = pd.read_parquet(PROCESSED / "realisasi_monthly.parquet")
     return emerging, ikpa, realisasi
 
 # =====================================================
@@ -68,13 +70,13 @@ def build_ikpa_risk(df):
 
 def build_realisasi_risk(df):
     realisasi = df.copy()
-    realisasi["target_pct"]      = realisasi["bulan"] / 12 * 100
-    realisasi["gap"]             = (realisasi["target_pct"] - realisasi["realisasi_pct"]).clip(lower=0)
-    realisasi["realisasi_risk"]  = normalize_series(realisasi["gap"])
+    realisasi["target_pct"]     = realisasi["bulan"] / 12 * 100
+    realisasi["gap"]            = (realisasi["target_pct"] - realisasi["realisasi_pct"]).clip(lower=0)
+    realisasi["realisasi_risk"] = normalize_series(realisasi["gap"])
     return realisasi[["periode", "realisasi_pct", "realisasi_risk"]]
 
 # =====================================================
-# SCORE
+# RISK SCORE
 # =====================================================
 
 def calculate_risk_score(df):
@@ -106,7 +108,7 @@ def assign_dynamic_labels(df):
     return df
 
 # =====================================================
-# BUILD
+# BUILD MONITOR
 # =====================================================
 
 def build_monitor(hai_df, ikpa_df, realisasi_df):
@@ -119,45 +121,40 @@ def build_monitor(hai_df, ikpa_df, realisasi_df):
     df = calculate_risk_score(df)
     df = assign_dynamic_labels(df)
 
-    # ==========================================
-    # EXTRACT YEAR & MONTH
-    # ==========================================
     df["tahun"] = df["periode"].str[:4].astype(int)
     df["bulan"] = df["periode"].str[-2:].astype(int)
 
     return df.sort_values("periode")
 
 # =====================================================
-# SAVE
+# SAVE OUTPUT
 # =====================================================
 
 def save_outputs(output_folder, df):
     output_folder.mkdir(parents=True, exist_ok=True)
 
     df.to_parquet(output_folder / "risk_monitor_dataset.parquet", index=False)
-    df.to_csv(output_folder / "risk_monitor_dataset.csv", index=False, encoding="utf-8-sig")
+    df.to_csv(    output_folder / "risk_monitor_dataset.csv",     index=False, encoding="utf-8-sig")
 
 # =====================================================
 # MAIN
 # =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    output_folder = root / "data" / "processed"
-
-    emerging, ikpa, realisasi = load_data(root)
+    emerging, ikpa, realisasi = load_data()
 
     hai_risk       = build_hai_risk(emerging)
     ikpa_risk      = build_ikpa_risk(ikpa)
     realisasi_risk = build_realisasi_risk(realisasi)
     risk_df        = build_monitor(hai_risk, ikpa_risk, realisasi_risk)
 
-    save_outputs(output_folder, risk_df)
+    save_outputs(PROCESSED, risk_df)
 
-    print("\nRISK MONITOR V2 DONE\n")
+    print("\nRISK MONITOR DONE\n")
     print(risk_df[["periode", "risk_score", "risk_level"]].tail(12))
     print("\nRisk Distribution\n")
     print(risk_df["risk_level"].value_counts())
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":

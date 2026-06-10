@@ -2,9 +2,12 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-ROOT      = Path(__file__).resolve().parents[2]
-PROCESSED = ROOT / "data" / "processed"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROCESSED    = PROJECT_ROOT / "data" / "processed"
 
+# =====================================================
+# LOAD DATA
+# =====================================================
 
 def load_data():
     emerging   = pd.read_parquet(PROCESSED / "emerging_issue_dataset.parquet")
@@ -13,14 +16,20 @@ def load_data():
     realisasi  = pd.read_csv(PROCESSED / "topic_realisasi_best_lag.csv")
     return emerging, complexity, ikpa, realisasi
 
+# =====================================================
+# NORMALIZE
+# =====================================================
 
 def normalize(series):
-    series  = np.log1p(series.clip(lower=0))
+    series          = np.log1p(series.clip(lower=0))
     min_val, max_val = series.min(), series.max()
     if max_val == min_val:
         return pd.Series(0, index=series.index)
     return (series - min_val) / (max_val - min_val) * 100
 
+# =====================================================
+# BUILD WATCHLIST
+# =====================================================
 
 def build_watchlist(emerging, complexity, ikpa, realisasi):
     emerging_latest = (
@@ -60,18 +69,24 @@ def build_watchlist(emerging, complexity, ikpa, realisasi):
     )
 
     df["priority"] = pd.cut(
-    df["watchlist_score"],
-    bins=[-1, 35, 55, 75, 100],
-    labels=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        df["watchlist_score"],
+        bins=[-1, 35, 55, 75, 100],
+        labels=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
     )
 
     return df.sort_values("watchlist_score", ascending=False).reset_index(drop=True)
 
+# =====================================================
+# SAVE OUTPUT
+# =====================================================
 
 def save_output(df):
     df.to_parquet(PROCESSED / "watchlist_topics.parquet", index=False)
-    df.to_csv(PROCESSED / "watchlist_topics.csv", index=False, encoding="utf-8-sig")
+    df.to_csv(    PROCESSED / "watchlist_topics.csv",     index=False, encoding="utf-8-sig")
 
+# =====================================================
+# MAIN
+# =====================================================
 
 def main():
     print("\nLoading datasets...")
@@ -82,6 +97,7 @@ def main():
 
     print("\nTOP WATCHLIST")
     print(watchlist.head(15))
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":

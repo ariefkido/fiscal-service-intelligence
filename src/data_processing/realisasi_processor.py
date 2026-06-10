@@ -2,6 +2,10 @@ from pathlib import Path
 import pandas as pd
 import re
 
+PROJECT_ROOT  = Path(__file__).resolve().parents[2]
+INPUT_FOLDER  = PROJECT_ROOT / "data" / "raw" / "Dataset Realisasi Anggaran 2020-2022"
+OUTPUT_FOLDER = PROJECT_ROOT / "data" / "processed"
+
 # =====================================================
 # MONTH MAPPING
 # =====================================================
@@ -65,11 +69,11 @@ def process_single_file(file_path):
 # PROCESS ALL FILES
 # =====================================================
 
-def process_all_files(folder):
-    files = sorted(Path(folder).glob("*.xlsx"))
+def process_all_files():
+    files = sorted(INPUT_FOLDER.glob("*.xlsx"))
 
     if not files:
-        raise FileNotFoundError(f"Tidak ada file:\n{folder}")
+        raise FileNotFoundError(f"Tidak ada file:\n{INPUT_FOLDER}")
 
     all_df = []
     for file in files:
@@ -92,34 +96,29 @@ def validate_dataset(df):
     print(f"Max Realisasi : {df['realisasi_pct'].max():.2f}%")
 
 # =====================================================
-# SAVE
+# SAVE OUTPUT
 # =====================================================
 
-def save_outputs(output_folder, df):
-    output_folder.mkdir(parents=True, exist_ok=True)
+def save_outputs(df):
+    OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    df.to_parquet(output_folder / "realisasi_monthly.parquet", index=False)
-    df.to_csv(output_folder / "realisasi_monthly.csv", index=False, encoding="utf-8-sig")
+    df.to_parquet(OUTPUT_FOLDER / "realisasi_monthly.parquet", index=False)
+    df.to_csv(    OUTPUT_FOLDER / "realisasi_monthly.csv",     index=False, encoding="utf-8-sig")
 
 # =====================================================
 # MAIN
 # =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    input_folder  = root / "data" / "raw" / "Dataset Realisasi Anggaran 2020-2022"
-    output_folder = root / "data" / "processed"
-
-    df = process_all_files(input_folder)
+    df = process_all_files()
     df = df.sort_values(["tahun", "bulan"])
 
     validate_dataset(df)
-    save_outputs(output_folder, df)
+    save_outputs(df)
 
-    print("\n=================================")
-    print("REALISASI PROCESSING DONE")
+    print("\nREALISASI PROCESSING DONE")
     print(df.head())
-    print("\n=================================")
+    print(f"\nOutput:\n{OUTPUT_FOLDER}")
 
 
 if __name__ == "__main__":

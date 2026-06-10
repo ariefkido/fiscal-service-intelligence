@@ -1,5 +1,8 @@
 import re
 
+# =====================================================
+# PSEUDONYMIZER
+# =====================================================
 
 class Pseudonymizer:
     def __init__(self):
@@ -15,25 +18,11 @@ class Pseudonymizer:
 
         return self.people[name]
 
-
-pseudo = Pseudonymizer()
-
+# =====================================================
+# ANONYMIZER
+# =====================================================
 
 def anonymize_text(text):
-    """
-    Masking PII untuk dataset HAI DJPb.
-
-    Yang dimasking:
-    - Email
-    - Nomor HP Indonesia
-    - NIP 18 digit
-    - NPWP
-    - Rekening
-    - URL
-    - IP Address
-    - Username
-    - Nama setelah sapaan formal
-    """
     if text is None:
         return ""
 
@@ -60,10 +49,10 @@ def anonymize_text(text):
     # rekening 10-20 digit
     text = re.sub(r'(?<!\d)\d{10,20}(?!\d)', 'ACCOUNT_MASKED', text)
 
-    # username — username=andi123 / user:andi123 / userid abc123
+    # username
     text = re.sub(r'(?i)\b(username|userid|user\s*id|user)\s*[:=]?\s*[a-z0-9._\-]+\b', 'USERNAME_MASKED', text)
 
-    # sapaan formal — Yth. Bapak Andi / Kepada Ibu Siti / Dear Pak Ahmad
+    # sapaan formal
     sapaan_patterns = [
         r'(?i)(yth\.?\s+bapak\s+)([A-Za-z][A-Za-z\s]{1,40})',
         r'(?i)(yth\.?\s+ibu\s+)([A-Za-z][A-Za-z\s]{1,40})',
@@ -76,7 +65,7 @@ def anonymize_text(text):
     for pattern in sapaan_patterns:
         text = re.sub(pattern, lambda m: f"{m.group(1)}PERSON_MASKED", text)
 
-    # user code — opr_527844_199901012020111001 / user_12345 / usr_999999
+    # user code
     text = re.sub(r'(?i)\b(?:opr|operator|usr|user)_[a-z0-9_]+\b', 'USERCODE_MASKED', text)
 
     # normalisasi spasi

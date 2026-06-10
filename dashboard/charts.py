@@ -24,7 +24,16 @@ def plot_service_heatmap(df):
         fill_value=0,
     )
 
-    fig = px.imshow(pivot, aspect="auto", title="Service Heatmap")
+    fig = px.imshow(
+        pivot,
+        aspect      = "auto",
+        title       = "Service Heatmap",
+        color_continuous_scale = [
+            [0.0, "#00B050"],
+            [0.5, "#FFD966"],
+            [1.0, "#C00000"],
+        ],
+    )
     fig.update_layout(height=500)
 
     return fig
@@ -157,13 +166,17 @@ def plot_realisasi_trend(df):
 
     return fig
 
+# =====================================================
+# LEADING INDICATOR
+# =====================================================
+
 def plot_leading_indicator(df, title):
     temp = (
-        df
-        .sort_values("abs_correlation", ascending=False)
+        df.sort_values("abs_correlation", ascending=False)
         .head(10)
         .sort_values("correlation")
     )
+
     fig = px.bar(
         temp,
         x="correlation",
@@ -174,19 +187,21 @@ def plot_leading_indicator(df, title):
         title=title,
     )
     fig.update_layout(height=500, xaxis_title="Correlation", yaxis_title="")
+
     return fig
 
 def build_leading_indicator_summary(ikpa_df, realisasi_df):
-    ikpa_top = ikpa_df.iloc[0]
-    real_top = realisasi_df.iloc[0]
-    return f"""
-Topik **{ikpa_top['topic']}** memiliki hubungan terkuat terhadap IKPA
-dengan korelasi **{ikpa_top['correlation']:.3f}** pada lag **{ikpa_top['lag']} bulan**.
-Topik **{real_top['topic']}** memiliki hubungan terkuat terhadap realisasi anggaran
-dengan korelasi **{real_top['correlation']:.3f}** pada lag **{real_top['lag']} bulan**.
-Temuan ini menunjukkan bahwa data layanan HAI DJPb mengandung sinyal operasional
-yang dapat dimanfaatkan sebagai leading indicator pelaksanaan anggaran.
-"""
+    ikpa_top = ikpa_df.sort_values("abs_correlation", ascending=False).iloc[0]
+    real_top = realisasi_df.sort_values("abs_correlation", ascending=False).iloc[0]
+
+    return (
+        f"Topik **{ikpa_top['topic']}** memiliki hubungan terkuat terhadap IKPA "
+        f"dengan korelasi **{ikpa_top['correlation']:.3f}** pada lag **{ikpa_top['lag']} bulan**. "
+        f"Topik **{real_top['topic']}** memiliki hubungan terkuat terhadap realisasi anggaran "
+        f"dengan korelasi **{real_top['correlation']:.3f}** pada lag **{real_top['lag']} bulan**. "
+        "Temuan ini menunjukkan bahwa data layanan HAI DJPb mengandung sinyal operasional "
+        "yang dapat dimanfaatkan sebagai leading indicator pelaksanaan anggaran."
+    )
 
 # =====================================================
 # EXECUTIVE KPI
@@ -216,24 +231,28 @@ def build_executive_kpis(emerging_df, complexity_df, risk_df, heatmap_df):
         "latest_risk":   latest_risk,
     }
 
+# =====================================================
+# EXECUTIVE SUMMARY
+# =====================================================
+
 def build_executive_summary(emerging_df, complexity_df, risk_df):
     if len(emerging_df) > 0:
-        top_emerging  = emerging_df.sort_values("emerging_index", ascending=False).iloc[0]
-        emerging_topic = top_emerging["topic"]
-        emerging_index = top_emerging["emerging_index"]
+        top_e          = emerging_df.sort_values("emerging_index", ascending=False).iloc[0]
+        emerging_topic = top_e["topic"]
+        emerging_index = top_e["emerging_index"]
     else:
         emerging_topic = "-"
         emerging_index = 0
 
-    top_complex  = complexity_df.sort_values("complexity_score", ascending=False).iloc[0]
-    complex_topic = top_complex["topic"]
-    complex_score = top_complex["complexity_score"]
+    top_c         = complexity_df.sort_values("complexity_score", ascending=False).iloc[0]
+    complex_topic = top_c["topic"]
+    complex_score = top_c["complexity_score"]
 
-    red_count   = (risk_df["risk_level"] == "RED").sum()
+    red_count    = (risk_df["risk_level"] == "RED").sum()
     yellow_count = (risk_df["risk_level"] == "YELLOW").sum()
     latest_risk  = risk_df.sort_values("periode").iloc[-1]["risk_level"]
 
-    summary = (
+    return (
         f"FSI mengidentifikasi {emerging_topic} sebagai isu yang mengalami "
         f"peningkatan paling signifikan sepanjang tahun dengan Emerging Index "
         f"sebesar {emerging_index:.0f} dan menjadi prioritas utama dalam Watchlist. "
@@ -246,22 +265,13 @@ def build_executive_summary(emerging_df, complexity_df, risk_df):
         f"operasional masih perlu diantisipasi melalui pembinaan dini pada "
         f"topik prioritas sebelum berdampak pada kualitas pelaksanaan anggaran."
     )
-    return summary
 
 # =====================================================
 # WATCHLIST
 # =====================================================
 
 def plot_watchlist(df):
-
-    temp = (
-        df
-        .head(10)
-        .sort_values(
-            "watchlist_score",
-            ascending=True
-        )
-    )
+    temp = df.head(10).sort_values("watchlist_score", ascending=True)
 
     fig = px.bar(
         temp,
@@ -270,43 +280,25 @@ def plot_watchlist(df):
         orientation="h",
         color="priority",
         text="watchlist_score",
-        title="Top Priority Topics"
+        title="Top Priority Topics",
     )
-
-    fig.update_traces(
-        texttemplate="%{text:.1f}",
-        textposition="outside"
-    )
-
-    fig.update_layout(
-        height=500,
-        xaxis_title="Watchlist Score",
-        yaxis_title=""
-    )
+    fig.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+    fig.update_layout(height=500, xaxis_title="Watchlist Score", yaxis_title="")
 
     return fig
 
 def build_watchlist_summary(df):
+    top  = df.iloc[0]
+    top5 = ", ".join(df.head(5)["topic"].tolist())
 
-    top = df.iloc[0]
-
-    top5 = ", ".join(
-        df.head(5)["topic"].tolist()
+    return (
+        f"Topik dengan prioritas tertinggi saat ini adalah **{top['topic']}** "
+        f"dengan Watchlist Score sebesar **{top['watchlist_score']:.2f}**. "
+        f"Topik prioritas pembinaan saat ini meliputi: {top5}. "
+        "Watchlist menggabungkan indikator Emerging Issues, Complexity Radar, "
+        "dan Leading Indicator Analysis untuk membantu menentukan urutan "
+        "intervensi yang perlu dilakukan terlebih dahulu."
     )
-
-    return f"""
-Topik dengan prioritas tertinggi saat ini adalah **{top['topic']}**
-dengan Watchlist Score sebesar **{top['watchlist_score']:.2f}**.
-
-Topik prioritas pembinaan saat ini meliputi:
-
-{top5}
-
-Watchlist menggabungkan indikator Emerging Issues,
-Complexity Radar, dan Leading Indicator Analysis
-untuk membantu menentukan urutan intervensi yang
-perlu dilakukan terlebih dahulu.
-"""
 
 # =====================================================
 # KEY FINDINGS
@@ -314,8 +306,8 @@ perlu dilakukan terlebih dahulu.
 
 def build_key_findings(watchlist_df, ikpa_leading_df, realisasi_leading_df, risk_df):
     top_watchlist = watchlist_df.iloc[0]
-    top_ikpa      = ikpa_leading_df.iloc[0]
-    top_realisasi = realisasi_leading_df.iloc[0]
+    top_ikpa      = ikpa_leading_df.sort_values("abs_correlation", ascending=False).iloc[0]
+    top_realisasi = realisasi_leading_df.sort_values("abs_correlation", ascending=False).iloc[0]
     red_months    = (risk_df["risk_level"] == "RED").sum()
     yellow_months = (risk_df["risk_level"] == "YELLOW").sum()
 

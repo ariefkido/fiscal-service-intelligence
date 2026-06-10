@@ -1,24 +1,18 @@
-"""
-=========================================================
-TOPIC TAXONOMY
-Fiscal Service Intelligence (FSI)
-
-Versi: 1.0
-=========================================================
-
-Master taxonomy untuk klasifikasi tiket HAI.
-
-Dipakai oleh:
-- topic_classifier.py
-- service_heatmap.py
-- emerging_issue.py
-- complexity_engine.py
-- risk_monitor.py
-"""
-
-# =========================================================
+# =====================================================
 # TOPIC TAXONOMY
-# =========================================================
+# Fiscal Service Intelligence (FSI)
+#
+# Dipakai oleh:
+# - topic_classifier.py
+# - service_heatmap.py
+# - emerging_issue.py
+# - complexity_engine.py
+# - risk_monitor.py
+# =====================================================
+
+# =====================================================
+# TAXONOMY
+# =====================================================
 
 TOPIC_TAXONOMY = {
 
@@ -163,7 +157,7 @@ TOPIC_TAXONOMY = {
     },
 
     # =====================================================
-    # APLIKASI LAMA / TRANSISI
+    # APLIKASI LEGACY
     # =====================================================
 
     "SAS": {
@@ -195,13 +189,11 @@ TOPIC_TAXONOMY = {
     },
 }
 
-# =========================================================
+# =====================================================
 # PRIORITY ORDER
-#
 # Jika satu tiket match lebih dari satu topik,
-# classifier akan memilih topik dengan prioritas
-# lebih tinggi.
-# =========================================================
+# classifier memilih topik dengan prioritas lebih tinggi.
+# =====================================================
 
 TOPIC_PRIORITY = [
     "SAKTI", "OMSPAN", "SPAN",
@@ -213,9 +205,9 @@ TOPIC_PRIORITY = [
     "PMRT", "LAINNYA",
 ]
 
-# =========================================================
-# HELPER
-# =========================================================
+# =====================================================
+# HELPERS
+# =====================================================
 
 ALL_TOPICS = list(TOPIC_TAXONOMY.keys())
 

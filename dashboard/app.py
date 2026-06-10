@@ -65,7 +65,7 @@ def load_all():
         realisasi_df,
         ikpa_leading_df,
         realisasi_leading_df,
-        watchlist_df
+        watchlist_df,
     )
 
 
@@ -78,10 +78,8 @@ def load_all():
     realisasi_df,
     ikpa_leading_df,
     realisasi_leading_df,
-    watchlist_df
+    watchlist_df,
 ) = load_all()
-
-print(emerging_df.columns.tolist())
 
 # =====================================================
 # HEADER
@@ -120,11 +118,6 @@ realisasi_filtered = realisasi_df[realisasi_df["tahun"]   == selected_year]
 # KPI
 # =====================================================
 
-print("\n=== DEBUG EMERGING ===")
-print(type(emerging_filtered))
-print(emerging_filtered.columns.tolist())
-print(emerging_filtered.head())
-
 kpis = build_executive_kpis(emerging_filtered, complexity_df, risk_filtered, heatmap_filtered)
 
 col1, col2, col3, col4 = st.columns(4)
@@ -139,73 +132,42 @@ st.divider()
 # EXECUTIVE SUMMARY
 # =====================================================
 
-summary_text = build_executive_summary(emerging_filtered, complexity_df, risk_filtered)
 st.subheader("📋 Executive Summary")
-st.success(summary_text)
+st.success(build_executive_summary(emerging_filtered, complexity_df, risk_filtered))
 st.divider()
 
 # =====================================================
 # EXECUTIVE INSIGHT
 # =====================================================
 
-# ---------------------------------------------
-# Top Emerging
-# ---------------------------------------------
-top_emerging = (
-    emerging_filtered.sort_values("emerging_index", ascending=False).iloc[0]["topic"]
-    if len(emerging_filtered) > 0 else "-"
-)
-
-# ---------------------------------------------
-# Top Complexity
-# ---------------------------------------------
-top_complexity = (
-    complexity_df.sort_values("complexity_score", ascending=False).iloc[0]["topic"]
-    if len(complexity_df) > 0 else "-"
-)
-
-# ---------------------------------------------
-# Latest Risk
-# ---------------------------------------------
-latest_risk = (
-    risk_filtered.sort_values("periode").iloc[-1]["risk_level"]
-    if len(risk_filtered) > 0 else "-"
-)
-
-# ---------------------------------------------
-# Recommendation
-# ---------------------------------------------
-if latest_risk == "RED":
-    recommendation = """
-Risiko pelaksanaan anggaran berada pada level tinggi.
-Prioritaskan intervensi segera terhadap topik yang mengalami
-peningkatan tercepat dan memiliki kompleksitas tinggi.
-"""
-elif latest_risk == "YELLOW":
-    recommendation = """
-Risiko pelaksanaan anggaran menunjukkan peningkatan.
-Perkuat monitoring dan lakukan langkah mitigasi
-pada topik yang sedang berkembang.
-"""
+if kpis["latest_risk"] == "RED":
+    recommendation = (
+        "Risiko pelaksanaan anggaran berada pada level tinggi. "
+        "Prioritaskan intervensi segera terhadap topik yang mengalami "
+        "peningkatan tercepat dan memiliki kompleksitas tinggi."
+    )
+elif kpis["latest_risk"] == "YELLOW":
+    recommendation = (
+        "Risiko pelaksanaan anggaran menunjukkan peningkatan. "
+        "Perkuat monitoring dan lakukan langkah mitigasi "
+        "pada topik yang sedang berkembang."
+    )
 else:
-    recommendation = """
-Kondisi pelaksanaan anggaran relatif stabil.
-Pertahankan monitoring rutin dan fokus pada
-topik dengan kompleksitas tertinggi.
-"""
+    recommendation = (
+        "Kondisi pelaksanaan anggaran relatif stabil. "
+        "Pertahankan monitoring rutin dan fokus pada "
+        "topik dengan kompleksitas tertinggi."
+    )
 
-# ---------------------------------------------
-# Display Insight
-# ---------------------------------------------
 st.info(
     f"""
 ### Executive Insight
 
-**Top Emerging Issue:** {top_emerging}
+**Top Emerging Issue:** {kpis["top_emerging"]}
 
-**Most Complex Topic:** {top_complexity}
+**Most Complex Topic:** {kpis["most_complex"]}
 
-**Current Risk Status:** {latest_risk}
+**Current Risk Status:** {kpis["latest_risk"]}
 
 ### Recommendation
 
@@ -227,7 +189,6 @@ col1, col2 = st.columns([2, 1])
 
 with col1:
     st.plotly_chart(plot_watchlist(watchlist_df), use_container_width=True)
-
 with col2:
     st.dataframe(watchlist_df[["topic", "watchlist_score", "priority"]].head(10), use_container_width=True)
 
@@ -244,7 +205,7 @@ for finding in build_key_findings(watchlist_df, ikpa_leading_df, realisasi_leadi
 st.divider()
 
 # =====================================================
-# PANEL 1 — Service Heatmap
+# SERVICE HEATMAP
 # =====================================================
 
 st.subheader("🔥 Service Heatmap")
@@ -252,60 +213,47 @@ st.plotly_chart(plot_service_heatmap(heatmap_filtered), use_container_width=True
 st.divider()
 
 # =====================================================
-# PANEL 2 — Topic Trend Comparison
+# TOPIC TREND COMPARISON
 # =====================================================
 
-st.subheader(
-    "📊 Topic Trend Comparison"
-)
+st.subheader("📊 Topic Trend Comparison")
 
-available_topics = sorted(
-    heatmap_filtered["topic"].unique()
-)
-
-default_topics = [
-    t for t in ["SPAN", "SPM", "GPP"]
-    if t in available_topics
-]
+available_topics = sorted(heatmap_filtered["topic"].unique())
+default_topics   = [t for t in ["SPAN", "SPM", "GPP"] if t in available_topics]
 
 selected_trend_topics = st.multiselect(
     "Pilih Topik untuk Dibandingkan",
     available_topics,
-    default=default_topics
+    default=default_topics,
 )
 
 if selected_trend_topics:
-
     st.plotly_chart(
-        plot_topic_comparison(
-            heatmap_filtered,
-            selected_trend_topics
-        ),
-        use_container_width=True
+        plot_topic_comparison(heatmap_filtered, selected_trend_topics),
+        use_container_width=True,
     )
 
 st.divider()
 
 # =====================================================
-# PANEL 3 — Top Emerging Issues
+# TOP EMERGING ISSUES
 # =====================================================
 
 st.subheader("📈 Top Emerging Issues")
 
 top_emerging_df = emerging_filtered.sort_values("emerging_index", ascending=False).head(10)
-
-cols = ["topic", "jumlah_tiket", "growth_rate", "emerging_index"]
+emerging_cols   = ["topic", "jumlah_tiket", "growth_rate", "emerging_index"]
 
 col1, col2 = st.columns([2, 1])
 with col1:
     st.plotly_chart(plot_emerging_issues(top_emerging_df), use_container_width=True)
 with col2:
-    st.dataframe(top_emerging_df[cols], use_container_width=True)
+    st.dataframe(top_emerging_df[emerging_cols], use_container_width=True)
 
 st.divider()
 
 # =====================================================
-# PANEL 4 — Complexity Radar
+# COMPLEXITY RADAR
 # =====================================================
 
 st.subheader("🎯 Complexity Radar Comparison")
@@ -316,14 +264,17 @@ selected_complexity_topics = st.multiselect(
     default=["SPAN", "SPM", "GPP"],
 )
 
-cols = ["topic", "complexity_score", "volume_score", "risk_score", "diversity_score", "length_score"]
+complexity_cols = ["topic", "complexity_score", "volume_score", "risk_score", "diversity_score", "length_score"]
 
 col1, col2 = st.columns([2, 1])
 with col1:
-    st.plotly_chart(plot_complexity_radar(complexity_df, selected_complexity_topics), use_container_width=True)
+    st.plotly_chart(
+        plot_complexity_radar(complexity_df, selected_complexity_topics),
+        use_container_width=True,
+    )
 with col2:
     comparison_df = (
-        complexity_df[complexity_df["topic"].isin(selected_complexity_topics)][cols]
+        complexity_df[complexity_df["topic"].isin(selected_complexity_topics)][complexity_cols]
         .sort_values("complexity_score", ascending=False)
     )
     st.dataframe(comparison_df, use_container_width=True)
@@ -331,44 +282,28 @@ with col2:
 st.divider()
 
 # =====================================================
-# PANEL 5 — Leading Indicator Analysis
+# LEADING INDICATOR ANALYSIS
 # =====================================================
 
 st.subheader("📎 Leading Indicator Analysis")
 
 col1, col2 = st.columns(2)
-
 with col1:
-
     st.plotly_chart(
-        plot_leading_indicator(
-            ikpa_leading_df,
-            "Top Topics vs IKPA"
-        ),
-        use_container_width=True
+        plot_leading_indicator(ikpa_leading_df, "Top Topics vs IKPA"),
+        use_container_width=True,
     )
-
 with col2:
-
     st.plotly_chart(
-        plot_leading_indicator(
-            realisasi_leading_df,
-            "Top Topics vs Realisasi"
-        ),
-        use_container_width=True
+        plot_leading_indicator(realisasi_leading_df, "Top Topics vs Realisasi"),
+        use_container_width=True,
     )
 
-st.info(
-    build_leading_indicator_summary(
-        ikpa_leading_df,
-        realisasi_leading_df
-    )
-)
-
+st.info(build_leading_indicator_summary(ikpa_leading_df, realisasi_leading_df))
 st.divider()
 
 # =====================================================
-# PANEL 6 — Risk Monitoring
+# RISK MONITORING
 # =====================================================
 
 st.subheader("🚨 Risk Monitoring")
@@ -380,17 +315,14 @@ with col2:
     st.plotly_chart(plot_risk_distribution(risk_filtered), use_container_width=True)
     if "threshold_yellow" in risk_filtered.columns:
         st.caption(
-            f"""
-Yellow Threshold : {risk_filtered['threshold_yellow'].iloc[0]:.2f}
-
-Red Threshold : {risk_filtered['threshold_red'].iloc[0]:.2f}
-"""
+            f"Yellow Threshold : {risk_filtered['threshold_yellow'].iloc[0]:.2f}\n\n"
+            f"Red Threshold    : {risk_filtered['threshold_red'].iloc[0]:.2f}"
         )
 
 st.divider()
 
 # =====================================================
-# IKPA VS REALISASI
+# OUTCOME INDICATORS
 # =====================================================
 
 st.subheader("📉 Outcome Indicators")
@@ -417,12 +349,12 @@ with st.expander("Lihat Dataset Risiko"):
 st.caption(
     """
     Fiscal Service Intelligence (FSI)
-    
+
     Dataset:
     - HAI DJPb 2020-2022
     - IKPA Kanwil DJPb Provinsi Jambi 2020-2022
     - Realisasi APBN Provinsi Jambi 2020-2022
-    
+
     DJPb Data Analytics Competition (DDAC)
     """
 )

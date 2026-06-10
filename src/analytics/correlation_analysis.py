@@ -1,9 +1,12 @@
 from pathlib import Path
 import pandas as pd
 
-ROOT      = Path(__file__).resolve().parents[2]
-PROCESSED = ROOT / "data" / "processed"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROCESSED    = PROJECT_ROOT / "data" / "processed"
 
+# =====================================================
+# LOAD DATA
+# =====================================================
 
 def load_data():
     heatmap   = pd.read_parquet(PROCESSED / "heatmap_dataset.parquet")
@@ -11,6 +14,9 @@ def load_data():
     realisasi = pd.read_parquet(PROCESSED / "realisasi_monthly.parquet")
     return heatmap, ikpa, realisasi
 
+# =====================================================
+# BUILD CORRELATION
+# =====================================================
 
 def _build_correlation(heatmap, other_df, other_col):
     rows = []
@@ -23,23 +29,28 @@ def _build_correlation(heatmap, other_df, other_col):
         if pd.isna(corr):
             corr = 0
         rows.append({"topic": topic, "correlation": round(corr, 4)})
+
     df = pd.DataFrame(rows)
     df["abs_correlation"] = df["correlation"].abs()
     return df.sort_values("abs_correlation", ascending=False)
 
-
 def build_ikpa_correlation(heatmap, ikpa):
     return _build_correlation(heatmap, ikpa, "ikpa_score")
-
 
 def build_realisasi_correlation(heatmap, realisasi):
     return _build_correlation(heatmap, realisasi, "realisasi_pct")
 
+# =====================================================
+# SAVE OUTPUT
+# =====================================================
 
 def save_output(ikpa_corr, realisasi_corr):
-    ikpa_corr.to_csv(PROCESSED / "topic_ikpa_correlation.csv", index=False, encoding="utf-8-sig")
-    realisasi_corr.to_csv(PROCESSED / "topic_realisasi_correlation.csv", index=False, encoding="utf-8-sig")
+    ikpa_corr.to_csv(      PROCESSED / "topic_ikpa_correlation.csv",      index=False, encoding="utf-8-sig")
+    realisasi_corr.to_csv( PROCESSED / "topic_realisasi_correlation.csv", index=False, encoding="utf-8-sig")
 
+# =====================================================
+# MAIN
+# =====================================================
 
 def main():
     print("\nLoading datasets...")
@@ -53,12 +64,11 @@ def main():
 
     save_output(ikpa_corr, realisasi_corr)
 
-    print("\n=================================")
     print("\nTOP IKPA CORRELATION")
     print(ikpa_corr.head(10))
     print("\nTOP REALISASI CORRELATION")
     print(realisasi_corr.head(10))
-    print("\n=================================")
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":

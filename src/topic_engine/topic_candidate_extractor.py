@@ -11,6 +11,8 @@ TOP_N_SUBJECTS   = 500
 MIN_KEYWORD_FREQ = 20
 MIN_BIGRAM_FREQ  = 10
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 # =====================================================
 # CLEAN SUBJECT
 # =====================================================
@@ -115,23 +117,22 @@ def save_outputs(output_folder, candidate_subjects, candidate_keywords, candidat
 
     candidate_subjects.to_csv(output_folder / "candidate_subjects.csv", index=False, encoding="utf-8-sig")
     candidate_keywords.to_csv(output_folder / "candidate_keywords.csv", index=False, encoding="utf-8-sig")
-    candidate_bigrams.to_csv(output_folder / "candidate_bigrams.csv",   index=False, encoding="utf-8-sig")
-    candidate_topics.to_csv(output_folder / "candidate_topics.csv",     index=False, encoding="utf-8-sig")
+    candidate_bigrams.to_csv( output_folder / "candidate_bigrams.csv",  index=False, encoding="utf-8-sig")
+    candidate_topics.to_csv(  output_folder / "candidate_topics.csv",   index=False, encoding="utf-8-sig")
 
     with pd.ExcelWriter(output_folder / "topic_summary.xlsx") as writer:
-        candidate_subjects.to_excel(writer, sheet_name="Subjects",  index=False)
-        candidate_keywords.to_excel(writer, sheet_name="Keywords",  index=False)
-        candidate_bigrams.to_excel(writer,  sheet_name="Bigrams",   index=False)
-        candidate_topics.to_excel(writer,   sheet_name="Topics",    index=False)
+        candidate_subjects.to_excel(writer, sheet_name="Subjects", index=False)
+        candidate_keywords.to_excel(writer, sheet_name="Keywords", index=False)
+        candidate_bigrams.to_excel( writer, sheet_name="Bigrams",  index=False)
+        candidate_topics.to_excel(  writer, sheet_name="Topics",   index=False)
 
 # =====================================================
 # MAIN
 # =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    input_file    = root / "outputs" / "topic_discovery" / "top_subjects.csv"
-    output_folder = root / "outputs" / "topic_candidates"
+    input_file    = PROJECT_ROOT / "outputs" / "topic_discovery" / "top_subjects.csv"
+    output_folder = PROJECT_ROOT / "outputs" / "topic_candidates"
 
     print("\nLoading top_subjects...")
     subject_df = load_subject_data(input_file)
@@ -147,10 +148,8 @@ def main():
 
     save_outputs(output_folder, subject_df, keyword_df, bigram_df, topic_df)
 
-    print("\n=================================")
-    print("TOPIC CANDIDATE EXTRACTION DONE")
+    print("\nTOPIC CANDIDATE EXTRACTION DONE")
     print(f"\nOutput:\n{output_folder}")
-    print("\n=================================")
 
 
 if __name__ == "__main__":

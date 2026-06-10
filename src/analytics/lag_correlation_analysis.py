@@ -1,10 +1,13 @@
 from pathlib import Path
 import pandas as pd
 
-ROOT      = Path(__file__).resolve().parents[2]
-PROCESSED = ROOT / "data" / "processed"
-MAX_LAG   = 3
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROCESSED    = PROJECT_ROOT / "data" / "processed"
+MAX_LAG      = 3
 
+# =====================================================
+# LOAD DATA
+# =====================================================
 
 def load_data():
     heatmap   = pd.read_parquet(PROCESSED / "heatmap_dataset.parquet")
@@ -12,6 +15,9 @@ def load_data():
     realisasi = pd.read_parquet(PROCESSED / "realisasi_monthly.parquet")
     return heatmap, ikpa, realisasi
 
+# =====================================================
+# BUILD LAG CORRELATION
+# =====================================================
 
 def build_lag_correlation(heatmap, target_df, target_col):
     rows = []
@@ -36,19 +42,6 @@ def build_lag_correlation(heatmap, target_df, target_col):
             merged = topic_df.merge(lag_target, on="periode", how="inner").dropna()
             if len(merged) < 6:
                 continue
-            if topic == "UP_TUP_GUP" and lag == 0:
-
-                print("\nDEBUG")
-
-                print(
-                    merged[
-                        [
-                            "periode",
-                            "jumlah_tiket",
-                            target_col
-                        ]
-                    ].head()
-                )
             corr = merged["jumlah_tiket"].corr(merged[target_col])
             if pd.isna(corr):
                 corr = 0
@@ -69,6 +62,9 @@ def build_lag_correlation(heatmap, target_df, target_col):
     )
     return result.sort_values(["abs_correlation", "lag"], ascending=[False, True]).reset_index(drop=True)
 
+# =====================================================
+# BUILD BEST LAG
+# =====================================================
 
 def build_best_lag(lag_df):
     if lag_df.empty:
@@ -81,13 +77,19 @@ def build_best_lag(lag_df):
         .reset_index(drop=True)
     )
 
+# =====================================================
+# SAVE OUTPUT
+# =====================================================
 
 def save_output(ikpa_lag, realisasi_lag, ikpa_best, realisasi_best):
-    ikpa_lag.to_csv(PROCESSED / "topic_ikpa_lag_correlation.csv", index=False, encoding="utf-8-sig")
-    realisasi_lag.to_csv(PROCESSED / "topic_realisasi_lag_correlation.csv", index=False, encoding="utf-8-sig")
-    ikpa_best.to_csv(PROCESSED / "topic_ikpa_best_lag.csv", index=False, encoding="utf-8-sig")
-    realisasi_best.to_csv(PROCESSED / "topic_realisasi_best_lag.csv", index=False, encoding="utf-8-sig")
+    ikpa_lag.to_csv(      PROCESSED / "topic_ikpa_lag_correlation.csv",      index=False, encoding="utf-8-sig")
+    realisasi_lag.to_csv( PROCESSED / "topic_realisasi_lag_correlation.csv", index=False, encoding="utf-8-sig")
+    ikpa_best.to_csv(     PROCESSED / "topic_ikpa_best_lag.csv",             index=False, encoding="utf-8-sig")
+    realisasi_best.to_csv(PROCESSED / "topic_realisasi_best_lag.csv",        index=False, encoding="utf-8-sig")
 
+# =====================================================
+# MAIN
+# =====================================================
 
 def main():
     print("\nLoading datasets...")
@@ -103,7 +105,6 @@ def main():
 
     save_output(ikpa_lag, realisasi_lag, ikpa_best, realisasi_best)
 
-    print("\n=================================")
     print("\nTOP IKPA LAG CORRELATION")
     print(ikpa_lag.head(20))
     print("\nBEST LAG PER TOPIC — IKPA")
@@ -112,7 +113,7 @@ def main():
     print(realisasi_lag.head(20))
     print("\nBEST LAG PER TOPIC — REALISASI")
     print(realisasi_best.head(10))
-    print("\n=================================")
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":
