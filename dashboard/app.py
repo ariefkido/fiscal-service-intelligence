@@ -1,6 +1,20 @@
 import streamlit as st
 import pandas as pd
 
+DISPLAY_COLUMNS = {
+    "topic": "Topic",
+    "jumlah_tiket": "Tickets",
+    "growth_rate": "Growth Rate",
+    "emerging_index": "Emerging Index",
+    "complexity_score": "Complexity",
+    "volume_score": "Volume",
+    "risk_score": "Risk",
+    "diversity_score": "Diversity",
+    "length_score": "Length",
+    "watchlist_score": "Watchlist Score",
+    "priority": "Rank",
+}
+
 from data_loader import (
     load_heatmap,
     load_emerging,
@@ -193,11 +207,7 @@ with col2:
     display_df = (
         watchlist_df[["priority", "topic", "watchlist_score"]]
         .head(10)
-        .rename(columns={
-            "priority":       "Rank",
-            "topic":          "Topic",
-            "watchlist_score": "Watchlist Score",
-        })
+        .rename(columns=DISPLAY_COLUMNS)
     )
     st.dataframe(
         display_df,
@@ -261,7 +271,16 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.plotly_chart(plot_emerging_issues(top_emerging_df), use_container_width=True)
 with col2:
-    st.dataframe(top_emerging_df[emerging_cols], use_container_width=True)
+    display_df = (
+        top_emerging_df[emerging_cols]
+        .copy()
+        .rename(columns=DISPLAY_COLUMNS)
+    )
+    st.dataframe(
+        display_df,
+        hide_index=True,
+        use_container_width=True,
+    )
 
 st.divider()
 
@@ -290,7 +309,17 @@ with col2:
         complexity_df[complexity_df["topic"].isin(selected_complexity_topics)][complexity_cols]
         .sort_values("complexity_score", ascending=False)
     )
-    st.dataframe(comparison_df, use_container_width=True)
+    display_df = (
+        comparison_df
+        .copy()
+        .rename(columns=DISPLAY_COLUMNS)
+        .round(2)
+    )
+    st.dataframe(
+        display_df,
+        hide_index=True,
+        use_container_width=True,
+    )
 
 st.divider()
 
@@ -353,7 +382,11 @@ st.divider()
 # =====================================================
 
 with st.expander("Lihat Dataset Risiko"):
-    st.dataframe(risk_filtered, use_container_width=True)
+    st.dataframe(
+        risk_filtered,
+        hide_index=True,
+        use_container_width=True,
+    )
 
 # =====================================================
 # FOOTER
