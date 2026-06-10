@@ -190,7 +190,20 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.plotly_chart(plot_watchlist(watchlist_df), use_container_width=True)
 with col2:
-    st.dataframe(watchlist_df[["topic", "watchlist_score", "priority"]].head(10), use_container_width=True)
+    display_df = (
+        watchlist_df[["priority", "topic", "watchlist_score"]]
+        .head(10)
+        .rename(columns={
+            "priority":       "Rank",
+            "topic":          "Topic",
+            "watchlist_score": "Watchlist Score",
+        })
+    )
+    st.dataframe(
+        display_df,
+        hide_index=True,
+        use_container_width=True,
+    )
 
 st.warning(build_watchlist_summary(watchlist_df))
 st.divider()
