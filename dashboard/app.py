@@ -173,10 +173,10 @@ watchlist_filtered = build_watchlist(
     ikpa_leading_df,
     realisasi_leading_df,
 )
-st.write("type:", type(watchlist_filtered))
-st.write("columns:", watchlist_filtered.columns.tolist() if hasattr(watchlist_filtered, "columns") else "N/A")
-st.write("shape:", watchlist_filtered.shape if hasattr(watchlist_filtered, "shape") else "N/A")
-st.stop()
+
+if "rank" not in watchlist_filtered.columns:
+    watchlist_filtered = watchlist_filtered.sort_values("watchlist_score", ascending=False).reset_index(drop=True)
+    watchlist_filtered["rank"] = range(1, len(watchlist_filtered) + 1)
 
 # =====================================================
 # KPI
