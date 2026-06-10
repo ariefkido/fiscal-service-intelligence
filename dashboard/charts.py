@@ -34,7 +34,12 @@ def plot_service_heatmap(df):
             [1.0, "#C00000"],
         ],
     )
-    fig.update_layout(height=500)
+    fig.update_layout(
+        height=500,
+        xaxis_title="Month",
+        yaxis_title="Topic",
+        coloraxis_colorbar_title="Tickets",
+    )
 
     return fig
 
@@ -124,7 +129,11 @@ def plot_risk_monitor(df):
         fig.add_hline(y=df["threshold_yellow"].iloc[0], line_dash="dash", annotation_text="Yellow")
         fig.add_hline(y=df["threshold_red"].iloc[0],    line_dash="dash", annotation_text="Red")
 
-    fig.update_layout(height=500)
+    fig.update_layout(
+        height=500,
+        xaxis_title="Period",
+        yaxis_title="Risk Score"
+    )
 
     return fig
 
@@ -152,7 +161,11 @@ def plot_ikpa_trend(df):
     fig.add_hline(y=89, line_dash="dot",  annotation_text="Baik")
     fig.add_hline(y=70, line_dash="dot",  annotation_text="Cukup")
 
-    fig.update_layout(height=500)
+    fig.update_layout(
+        height=500,
+        xaxis_title="Period",
+        yaxis_title="IKPA Score"
+    )
 
     return fig
 
@@ -162,7 +175,12 @@ def plot_ikpa_trend(df):
 
 def plot_realisasi_trend(df):
     fig = px.line(df, x="periode", y="realisasi_pct", markers=True, title="Realisasi Anggaran (%)")
-    fig.update_layout(height=500)
+    
+    fig.update_layout(
+        height=500,
+        xaxis_title="Period",
+        yaxis_title="Budget Realization (%)"
+    )
 
     return fig
 
@@ -190,7 +208,7 @@ def plot_leading_indicator(df, title):
             "Negative": "#C00000"   # merah
         }
     )
-    fig.update_layout(height=500, xaxis_title="Correlation", yaxis_title="")
+    fig.update_layout(height=500, xaxis_title="Correlation Strength", yaxis_title="")
 
     return fig
 
@@ -282,7 +300,8 @@ def plot_watchlist(df):
         x="watchlist_score",
         y="topic",
         orientation="h",
-        color="priority",
+        color="watchlist_score",
+        color_continuous_scale="Reds",
         text="watchlist_score",
         title="Top Priority Topics",
     )
