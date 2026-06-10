@@ -178,6 +178,7 @@ if "rank" not in watchlist_filtered.columns:
     watchlist_filtered = watchlist_filtered.sort_values("watchlist_score", ascending=False).reset_index(drop=True)
     watchlist_filtered["rank"] = range(1, len(watchlist_filtered) + 1)
 
+
 # =====================================================
 # KPI
 # =====================================================
