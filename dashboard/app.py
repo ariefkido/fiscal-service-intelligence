@@ -262,9 +262,17 @@ st.divider()
 # TOP EMERGING ISSUES
 # =====================================================
 
-st.subheader("📈 Top Emerging Issues")
+st.subheader("Top Emerging Issues")
 
-top_emerging_df = emerging_filtered.sort_values("emerging_index", ascending=False).head(10)
+latest_period = emerging_filtered["periode"].max()
+
+top_emerging_df = (
+    emerging_filtered[
+        emerging_filtered["periode"] == latest_period
+    ]
+    .sort_values("emerging_index", ascending=False)
+    .head(10)
+)
 emerging_cols   = ["topic", "jumlah_tiket", "growth_rate", "emerging_index"]
 
 col1, col2 = st.columns([2, 1])
