@@ -185,6 +185,10 @@ def plot_leading_indicator(df, title):
         orientation="h",
         hover_data=["lag"],
         title=title,
+        color_discrete_map={
+            "Positive": "#00B050",  # hijau
+            "Negative": "#C00000"   # merah
+        }
     )
     fig.update_layout(height=500, xaxis_title="Correlation", yaxis_title="")
 
