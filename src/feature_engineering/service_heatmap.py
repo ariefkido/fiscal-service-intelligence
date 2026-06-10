@@ -6,8 +6,10 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 import pandas as pd
 
+PROCESSED = PROJECT_ROOT / "data" / "processed"
+
 # =====================================================
-# LOAD
+# LOAD DATA
 # =====================================================
 
 def load_topic_dataset(file_path):
@@ -44,40 +46,35 @@ def build_heatmap_pivot(df):
     )
 
 # =====================================================
-# SAVE
+# SAVE OUTPUT
 # =====================================================
 
-def save_outputs(output_folder, heatmap_df, pivot_df):
-    output_folder.mkdir(parents=True, exist_ok=True)
+def save_outputs(heatmap_df, pivot_df):
+    PROCESSED.mkdir(parents=True, exist_ok=True)
 
-    heatmap_df.to_parquet(output_folder / "heatmap_dataset.parquet", index=False)
-    heatmap_df.to_csv(output_folder / "heatmap_dataset.csv", index=False, encoding="utf-8-sig")
-    pivot_df.to_csv(output_folder / "heatmap_pivot.csv", encoding="utf-8-sig")
+    heatmap_df.to_parquet(PROCESSED / "heatmap_dataset.parquet", index=False)
+    heatmap_df.to_csv(    PROCESSED / "heatmap_dataset.csv",     index=False, encoding="utf-8-sig")
+    pivot_df.to_csv(      PROCESSED / "heatmap_pivot.csv",       encoding="utf-8-sig")
 
 # =====================================================
 # MAIN
 # =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    input_file    = root / "data" / "processed" / "topic_dataset.parquet"
-    output_folder = root / "data" / "processed"
+    input_file = PROCESSED / "topic_dataset.parquet"
 
     df = load_topic_dataset(input_file)
-    print(f"Total tiket : {len(df):,}")
+    print(f"Total tiket  : {len(df):,}")
 
     heatmap_df = build_heatmap_dataset(df)
     pivot_df   = build_heatmap_pivot(heatmap_df)
 
-    save_outputs(output_folder, heatmap_df, pivot_df)
+    save_outputs(heatmap_df, pivot_df)
 
-    print("\n=================================")
     print(f"Rows heatmap : {len(heatmap_df):,}")
     print("\nTop 10 records:")
     print(heatmap_df.head(10))
-    print("\nOutput:")
-    print(output_folder)
-    print("\n=================================")
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":

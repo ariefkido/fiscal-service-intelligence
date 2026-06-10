@@ -9,6 +9,8 @@ import numpy as np
 
 from topic_engine.topic_taxonomy import TOPIC_TAXONOMY
 
+PROCESSED = PROJECT_ROOT / "data" / "processed"
+
 # =====================================================
 # CONFIG
 # =====================================================
@@ -27,14 +29,10 @@ def normalize_score(series):
     if max_val == min_val:
         return pd.Series([100] * len(series), index=series.index)
 
-    return (
-        (series - min_val)
-        / (max_val - min_val)
-        * 100
-    )
+    return (series - min_val) / (max_val - min_val) * 100
 
 # =====================================================
-# LOAD
+# LOAD DATA
 # =====================================================
 
 def load_heatmap_dataset(file_path):
@@ -46,7 +44,7 @@ def load_heatmap_dataset(file_path):
 # =====================================================
 
 def add_risk_weight(df):
-    risk_map = {topic: meta["risk_weight"] for topic, meta in TOPIC_TAXONOMY.items()}
+    risk_map         = {topic: meta["risk_weight"] for topic, meta in TOPIC_TAXONOMY.items()}
     df["risk_weight"] = df["topic"].map(risk_map).fillna(1)
     return df
 
@@ -82,7 +80,7 @@ def calculate_growth(df):
     return df
 
 # =====================================================
-# SCORE
+# EMERGING SCORE
 # =====================================================
 
 def calculate_emerging_score(df):
@@ -92,8 +90,8 @@ def calculate_emerging_score(df):
     df = df[df["topic"] != "LAINNYA"]
     df = df[df["jumlah_tiket"] >= MIN_TICKET_VOLUME]
 
-    df["growth_score"] = df["growth_rate"].clip(lower=-100, upper=300).fillna(0)
-    df["volume_score"] = np.log1p(df["jumlah_tiket"])
+    df["growth_score"]   = df["growth_rate"].clip(lower=-100, upper=300).fillna(0)
+    df["volume_score"]   = np.log1p(df["jumlah_tiket"])
     df["emerging_score"] = (
         (0.60 * df["growth_score"] + 0.40 * (df["volume_score"] * 20)) * df["risk_weight"]
     )
@@ -102,13 +100,13 @@ def calculate_emerging_score(df):
     return df
 
 # =====================================================
-# LABEL
+# RISK LABEL
 # =====================================================
 
 def assign_risk_level(score):
     if pd.isna(score): return "GREEN"
-    if score >= 70:  return "RED"
-    if score >= 40:   return "YELLOW"
+    if score >= 70:    return "RED"
+    if score >= 40:    return "YELLOW"
     return "GREEN"
 
 # =====================================================
@@ -125,24 +123,22 @@ def build_top10_latest(df):
     return latest.head(10)
 
 # =====================================================
-# SAVE
+# SAVE OUTPUT
 # =====================================================
 
-def save_outputs(output_folder, emerging_df, top10_df):
-    output_folder.mkdir(parents=True, exist_ok=True)
+def save_outputs(emerging_df, top10_df):
+    PROCESSED.mkdir(parents=True, exist_ok=True)
 
-    emerging_df.to_parquet(output_folder / "emerging_issue_dataset.parquet", index=False)
-    emerging_df.to_csv(output_folder / "emerging_issue_dataset.csv", index=False, encoding="utf-8-sig")
-    top10_df.to_csv(output_folder / "top10_emerging_latest.csv", index=False, encoding="utf-8-sig")
+    emerging_df.to_parquet(PROCESSED / "emerging_issue_dataset.parquet", index=False)
+    emerging_df.to_csv(    PROCESSED / "emerging_issue_dataset.csv",     index=False, encoding="utf-8-sig")
+    top10_df.to_csv(       PROCESSED / "top10_emerging_latest.csv",      index=False, encoding="utf-8-sig")
 
 # =====================================================
 # MAIN
 # =====================================================
 
 def main():
-    root          = Path(__file__).resolve().parents[2]
-    input_file    = root / "data" / "processed" / "heatmap_dataset.parquet"
-    output_folder = root / "data" / "processed"
+    input_file = PROCESSED / "heatmap_dataset.parquet"
 
     df = load_heatmap_dataset(input_file)
     df = add_risk_weight(df)
@@ -151,15 +147,17 @@ def main():
     df = calculate_emerging_score(df)
 
     top10_df = build_top10_latest(df)
-    save_outputs(output_folder, df, top10_df)
+    save_outputs(df, top10_df)
 
-    cols = ["topic", "jumlah_tiket", "baseline", "growth_rate", "risk_weight", "emerging_score", "emerging_index", "risk_level"]
+    cols = [
+        "topic", "jumlah_tiket", "baseline", "growth_rate",
+        "risk_weight", "emerging_score", "emerging_index", "risk_level",
+    ]
 
-    print("\n=================================")
-    print("EMERGING ISSUE ANALYSIS DONE")
+    print("\nEMERGING ISSUE ANALYSIS DONE")
     print("\nTop 10 Emerging Risk Issues")
     print(top10_df[cols])
-    print("\n=================================")
+    print(f"\nOutput:\n{PROCESSED}")
 
 
 if __name__ == "__main__":

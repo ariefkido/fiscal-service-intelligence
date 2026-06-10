@@ -10,7 +10,7 @@ import re
 from topic_engine.topic_taxonomy import TOPIC_TAXONOMY, TOPIC_PRIORITY
 
 # =====================================================
-# CLEAN TEXT
+# NORMALIZE TEXT
 # =====================================================
 
 def normalize_text(text):
@@ -23,8 +23,9 @@ def normalize_text(text):
 
     return text
 
-
-# --- classify topic ----------------------------------------------------------
+# =====================================================
+# CLASSIFY TOPIC
+# =====================================================
 
 def classify_topic(subject, message):
     combined = f"{normalize_text(subject)} {normalize_text(message)}"
@@ -36,15 +37,17 @@ def classify_topic(subject, message):
 
     return "LAINNYA"
 
-
-# --- load data ---------------------------------------------------------------
+# =====================================================
+# LOAD DATA
+# =====================================================
 
 def load_ticket_dataset(file_path):
     print("\nLoading ticket dataset...")
     return pd.read_parquet(file_path)
 
-
-# --- apply classification ----------------------------------------------------
+# =====================================================
+# APPLY CLASSIFICATION
+# =====================================================
 
 def apply_classification(df):
     print("\nClassifying topics...")
@@ -60,7 +63,7 @@ def apply_classification(df):
     return df
 
 # =====================================================
-# COVERAGE ANALYSIS
+# SUMMARY & COVERAGE
 # =====================================================
 
 def build_summary(df):
@@ -74,17 +77,20 @@ def calculate_coverage(df):
     uncategorized = (df["topic"] == "LAINNYA").sum()
     return round((total - uncategorized) / total * 100, 2)
 
-
-# --- save output -------------------------------------------------------------
+# =====================================================
+# SAVE OUTPUT
+# =====================================================
 
 def save_output(output_folder, topic_df, summary_df):
     output_folder.mkdir(parents=True, exist_ok=True)
 
-    topic_df.to_parquet(output_folder / "topic_dataset.parquet", index=False)
-    summary_df.to_csv(output_folder / "topic_summary.csv", index=False, encoding="utf-8-sig")
+    public_df = topic_df.drop(columns=["subject", "pesan"], errors="ignore")
+    public_df.to_parquet(output_folder / "topic_dataset.parquet",  index=False)
+    summary_df.to_csv(   output_folder / "topic_summary.csv",      index=False, encoding="utf-8-sig")
 
-
-# --- main --------------------------------------------------------------------
+# =====================================================
+# MAIN
+# =====================================================
 
 def main():
     input_file    = PROJECT_ROOT / "outputs" / "topic_discovery" / "ticket_dataset.parquet"
@@ -99,9 +105,7 @@ def main():
 
     save_output(output_folder, topic_df, summary_df)
 
-    print("\n==================================")
-    print(f"Coverage     : {coverage}%")
-    print(f"Classified   : {coverage}%")
+    print(f"\nClassified   : {coverage}%")
     print(f"Unclassified : {100 - coverage}%")
     print("\nTop Topics")
     print(summary_df.head(20))
