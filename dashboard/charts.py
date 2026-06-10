@@ -144,8 +144,14 @@ def plot_risk_monitor(df):
 def plot_risk_distribution(df):
     summary         = df["risk_level"].value_counts().reset_index()
     summary.columns = ["risk_level", "count"]
-
-    fig = px.pie(summary, names="risk_level", values="count", title="Risk Distribution")
+    color_map = {
+        "GREEN": "#00B050",
+        "YELLOW": "#FFD966",
+        "RED": "#C00000",
+    }
+    
+    fig = px.pie(summary, names="risk_level", values="count", title="Risk Distribution", color="risk_level", color_discrete_map=color_map,)
+    fig.update_traces(textinfo="percent", textfont_size=14)
     fig.update_layout(height=500)
 
     return fig
