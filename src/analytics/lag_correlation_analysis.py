@@ -67,13 +67,22 @@ def build_lag_correlation(heatmap, target_df, target_col):
 # =====================================================
 
 def build_best_lag(lag_df):
+
     if lag_df.empty:
         return lag_df
+
+    # hanya lag yang benar-benar mendahului
+    lag_df = lag_df[lag_df["lag"] > 0]
+
     return (
         lag_df
-        .sort_values(["abs_correlation", "lag"], ascending=[False, True])
+        .sort_values(
+            ["abs_correlation", "lag"],
+            ascending=[False, True]
+        )
         .drop_duplicates(subset="topic", keep="first")
-        [["target", "topic", "lag", "correlation", "abs_correlation", "direction"]]
+        [["target", "topic", "lag", "correlation",
+          "abs_correlation", "direction"]]
         .reset_index(drop=True)
     )
 

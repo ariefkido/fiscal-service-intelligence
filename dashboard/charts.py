@@ -263,10 +263,17 @@ def plot_leading_indicator(df, title):
         .sort_values("correlation")
     )
 
+    temp["topic_label"] = (
+        temp["topic"]
+        + " (L"
+        + temp["lag"].astype(str)
+        + ")"
+    )
+
     fig = px.bar(
         temp,
         x="correlation",
-        y="topic",
+        y="topic_label",
         color="direction",
         orientation="h",
         hover_data=["lag"],
@@ -285,12 +292,17 @@ def build_leading_indicator_summary(ikpa_df, realisasi_df):
     real_top = realisasi_df.sort_values("abs_correlation", ascending=False).iloc[0]
 
     return (
-        f"Topik **{ikpa_top['topic']}** memiliki hubungan terkuat terhadap IKPA "
-        f"dengan korelasi **{ikpa_top['correlation']:.3f}** pada lag **{ikpa_top['lag']} bulan**. "
-        f"Topik **{real_top['topic']}** memiliki hubungan terkuat terhadap realisasi anggaran "
-        f"dengan korelasi **{real_top['correlation']:.3f}** pada lag **{real_top['lag']} bulan**. "
-        "Temuan ini menunjukkan bahwa data layanan HAI DJPb mengandung sinyal operasional "
-        "yang dapat dimanfaatkan sebagai leading indicator pelaksanaan anggaran."
+        f"Topik **{ikpa_top['topic']}** menunjukkan sinyal "
+        f"{ikpa_top['lag']} bulan sebelum perubahan IKPA "
+        f"dengan korelasi **{ikpa_top['correlation']:.3f}**. "
+
+        f"Topik **{real_top['topic']}** menunjukkan sinyal "
+        f"{real_top['lag']} bulan sebelum perubahan realisasi anggaran "
+        f"dengan korelasi **{real_top['correlation']:.3f}**. "
+
+        "Hasil ini mengindikasikan bahwa pola layanan HAI DJPb "
+        "dapat dimanfaatkan sebagai leading indicator untuk "
+        "mendeteksi potensi risiko pelaksanaan anggaran lebih dini."
     )
 
 # =====================================================
@@ -404,8 +416,9 @@ def build_key_findings(watchlist_df, ikpa_leading_df, realisasi_leading_df, risk
 
     return [
         f"🔴 Prioritas utama saat ini adalah **{top_watchlist['topic']}** dengan Watchlist Score **{top_watchlist['watchlist_score']:.2f}**.",
-        f"📉 Topik **{top_ikpa['topic']}** memiliki hubungan negatif terkuat terhadap IKPA ({top_ikpa['correlation']:.3f}).",
-        f"⏳ Topik **{top_realisasi['topic']}** berkorelasi dengan perlambatan realisasi anggaran setelah {top_realisasi['lag']} bulan ({top_realisasi['correlation']:.3f}).",
+        f"📉 Topik **{top_ikpa['topic']}** menunjukkan sinyal "
+        f"{top_ikpa['lag']} bulan sebelum perubahan IKPA "
+        f"({top_ikpa['correlation']:.3f})."        f"⏳ Topik **{top_realisasi['topic']}** berkorelasi dengan perlambatan realisasi anggaran setelah {top_realisasi['lag']} bulan ({top_realisasi['correlation']:.3f}).",
         f"⚠️ Risk Monitor mencatat **{red_months} bulan RED** dan **{yellow_months} bulan YELLOW**.",
         "🎯 **Rekomendasi:** Fokuskan pembinaan pada topik prioritas Watchlist, khususnya yang berdampak terhadap IKPA dan realisasi.",
     ]

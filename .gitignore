@@ -47,3 +47,6 @@ dist/
 # Testing
 .pytest_cache/
 .coverage
+
+# output
+outputs/
